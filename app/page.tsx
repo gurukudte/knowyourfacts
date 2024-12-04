@@ -1,5 +1,27 @@
 import { Button } from "@/components/ui/button";
 
+/**
+ * Home Page Component
+ * 
+ * This is the main landing page component for the Know Your Facts platform.
+ * It provides an overview of the platform's key features and calls-to-action
+ * for users to explore content or contribute.
+ * 
+ * Component Structure:
+ * - Hero Section: Main headline, description, and primary CTAs
+ * - Features Section: Three key features displayed in a grid
+ * - CTA Section: Final call-to-action for user registration
+ * 
+ * Key Features Highlighted:
+ * 1. Technical Articles
+ * 2. Development Tools
+ * 3. Community Engagement
+ * 
+ * Navigation Links:
+ * - /explore: Takes users to content exploration page
+ * - /share: Takes users to resource sharing page
+ * - /register: Takes users to registration page
+ */
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

@@ -2,6 +2,32 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 
+/**
+ * AppLayout Component
+ * 
+ * A layout component that provides the main application structure including navigation
+ * and content area. This component wraps all pages to maintain consistent layout and navigation.
+ * 
+ * Component Structure:
+ * - Navigation Bar: Contains logo, navigation links, and authentication buttons
+ * - Main Content Area: Renders child components in a flexible container
+ * 
+ * Navigation Links:
+ * - /: Home page
+ * - /explore: Content exploration page
+ * - /share: Resource sharing page
+ * - /login: User login page
+ * - /register: User registration page
+ * 
+ * Features:
+ * - Responsive navigation with mobile optimization
+ * - Consistent spacing and layout across pagesS
+ * - Authentication-related actions (login/signup)
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} [props.children] - Child components to render in the main content area
+ */
 type Props = {
   children?: React.ReactNode;
 };
