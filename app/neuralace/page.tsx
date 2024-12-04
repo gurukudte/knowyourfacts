@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React, { useEffect } from "react";
+import React from "react";
 
 /**
  * Session Timer Application
@@ -17,9 +17,7 @@ import React, { useEffect } from "react";
  * - Time formatting from 24h to 12h format
  */
 
-type Props = {};
-
-const Page = (props: Props) => {
+const Page = () => {
   // Initialize state for all sessions with default times
   const [sessions, setSessions] = React.useState(
     [...Array(11)].map(() =>
