@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const page: React.FC = () => {
+const Page = () => {
   const [formData, setFormData] = useState({
     username: "",
     current_session: "1",
@@ -196,4 +196,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default Page;
