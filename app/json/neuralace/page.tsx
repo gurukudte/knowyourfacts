@@ -214,6 +214,7 @@ const Page = () => {
           <Button type="submit" className="w-full">
             Download JSON
           </Button>
+        </form>
       </CardContent>
     </Card>
   );
