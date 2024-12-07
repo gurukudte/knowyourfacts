@@ -214,8 +214,6 @@ const Page = () => {
           <Button type="submit" className="w-full">
             Download JSON
           </Button>
-        </form>
-        <p className="relative w-14">{JSON.stringify(formData)}</p>
       </CardContent>
     </Card>
   );
