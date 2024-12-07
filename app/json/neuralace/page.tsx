@@ -215,7 +215,6 @@ const Page = () => {
             Download JSON
           </Button>
         </form>
-        <p className="relative w-14">{JSON.stringify(formData)}</p>
       </CardContent>
     </Card>
   );
