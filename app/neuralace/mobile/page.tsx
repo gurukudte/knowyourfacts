@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 
 /**
  * Represents the data structure for a single session
@@ -13,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
  * @property {string} sessionId - Unique identifier for the session
  * @property {string} highImpedance - High impedance value
  * @property {string} lowImpedance - Low impedance value
- * @property {Array<{startTime: string, endTime: string, lastUpdated: string | null}>} videos - Array of video timing data
+ * @property {Array<{startTime: string, endTime: string, lastUpdated: string | null, notes: string}>} videos - Array of video timing data
  */
 interface SessionData {
   sessionId: string;
@@ -23,6 +24,7 @@ interface SessionData {
     startTime: string;
     endTime: string;
     lastUpdated: string | null;
+    notes: string;
   }[];
 }
 
@@ -76,6 +78,7 @@ export default function ToolRecording() {
         startTime: DEFAULT_TIME,
         endTime: DEFAULT_TIME,
         lastUpdated: null,
+        notes: "",
       }),
     }));
   });
@@ -114,21 +117,24 @@ export default function ToolRecording() {
    * Updates video timing data
    * @param {number} sessionIndex - Index of the session
    * @param {number} videoIndex - Index of the video
-   * @param {"startTime" | "endTime"} timeType - Type of time to update
-   * @param {string} value - New time value
+   * @param {"startTime" | "endTime" | "notes"} field - Field to update
+   * @param {string} value - New value
    */
   const handleVideoTimeChange = (
     sessionIndex: number,
     videoIndex: number,
-    timeType: "startTime" | "endTime",
+    field: "startTime" | "endTime" | "notes",
     value: string
   ) => {
     setSessions((prev) => {
       const newSessions = [...prev];
       newSessions[sessionIndex].videos[videoIndex] = {
         ...newSessions[sessionIndex].videos[videoIndex],
-        [timeType]: value,
-        lastUpdated: new Date().toLocaleString(),
+        [field]: value,
+        lastUpdated:
+          field !== "notes"
+            ? new Date().toLocaleString()
+            : newSessions[sessionIndex].videos[videoIndex].lastUpdated,
       };
       return newSessions;
     });
@@ -160,6 +166,7 @@ export default function ToolRecording() {
         startTime: DEFAULT_TIME,
         endTime: DEFAULT_TIME,
         lastUpdated: null,
+        notes: "",
       });
       return newSessions;
     });
@@ -207,9 +214,11 @@ impedence: H-${currentSessionData.highImpedance}/L-${
 TIMINGS:
 ${currentSessionData.videos
   .map(
-    (video) => `${formatTime(video.startTime)}\t${formatTime(video.endTime)}`
+    (video, index) => `Video ${index + 1}:
+${formatTime(video.startTime)}\t${formatTime(video.endTime)}
+Notes: ${video.notes || "No notes"}`
   )
-  .join("\n")}`;
+  .join("\n\n")}`;
 
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encodedMessage}`, "_blank");
@@ -392,6 +401,28 @@ ${currentSessionData.videos
                               Record
                             </Button>
                           </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor={`session-${currentSession}-video-${videoIndex}-notes`}
+                            className="text-sm"
+                          >
+                            Notes
+                          </Label>
+                          <Textarea
+                            id={`session-${currentSession}-video-${videoIndex}-notes`}
+                            value={video.notes}
+                            onChange={(e) =>
+                              handleVideoTimeChange(
+                                currentSession,
+                                videoIndex,
+                                "notes",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Add notes for this video..."
+                            className="min-h-[80px]"
+                          />
                         </div>
                       </CardContent>
                     </Card>
