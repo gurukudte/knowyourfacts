@@ -9,34 +9,38 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 
 /**
- * Represents the data structure for a single session
- * @interface SessionData
- * @property {string} sessionId - Unique identifier for the session
- * @property {string} highImpedance - High impedance value
- * @property {string} lowImpedance - Low impedance value
- * @property {Array<{startTime: string, endTime: string, lastUpdated: string | null, notes: string}>} videos - Array of video timing data
+ * Represents the data structure for a single video within a session
+ */
+interface VideoData {
+  startTime: string;
+  endTime: string;
+  lastUpdated: string | null;
+  notes: string;
+}
+
+/**
+ * Represents the data structure for a complete session
  */
 interface SessionData {
   sessionId: string;
   highImpedance: string;
   lowImpedance: string;
-  videos: {
-    startTime: string;
-    endTime: string;
-    lastUpdated: string | null;
-    notes: string;
-  }[];
+  videos: VideoData[];
 }
 
-// Constants for default values and configuration
+// Default time value used for new/reset video timings
 const DEFAULT_TIME = "00:00:00";
 
+// Number of sessions and videos per session
+const TOTAL_SESSIONS = 13;
+const VIDEOS_PER_SESSION = 6;
+
 /**
- * Formats a 24h time string to 12h format
- * @param {string} timeStr - Time string in 24h format (HH:mm:ss)
- * @returns {string} Time string in 12h format (hh:mm:ss am/pm)
+ * Formats a 24h time string to 12h format with AM/PM
+ * @param timeStr - Time string in 24h format (HH:mm:ss)
+ * @returns Formatted time string in 12h format (hh:mm:ss am/pm)
  */
-const formatTime = (timeStr: string) => {
+const formatTime = (timeStr: string): string => {
   const date = new Date();
   const [hours, minutes, seconds] = timeStr.split(":");
   date.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds));
@@ -51,157 +55,157 @@ const formatTime = (timeStr: string) => {
 };
 
 /**
+ * Creates a new empty video data object
+ */
+const createEmptyVideo = (): VideoData => ({
+  startTime: DEFAULT_TIME,
+  endTime: DEFAULT_TIME,
+  lastUpdated: null,
+  notes: "",
+});
+
+/**
+ * Creates a new empty session data object
+ */
+const createEmptySession = (): SessionData => ({
+  sessionId: "",
+  highImpedance: "",
+  lowImpedance: "",
+  videos: Array(VIDEOS_PER_SESSION).fill(null).map(createEmptyVideo),
+});
+
+/**
  * Tool Recording Component
- * Provides interface for recording session data and video timings
+ * Provides interface for recording and managing multiple sessions of video timing data
  */
 export default function ToolRecording() {
-  // State for tracking current session index
+  // Initialize current session from localStorage or default to 0
   const [currentSession, setCurrentSession] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("currentSession");
-      return saved ? parseInt(saved) : 0;
-    }
-    return 0;
+    if (typeof window === "undefined") return 0;
+    return parseInt(localStorage.getItem("currentSession") || "0");
   });
 
-  // State for storing all sessions data
+  // Initialize sessions data from localStorage or create new empty sessions
   const [sessions, setSessions] = useState<SessionData[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("sessions");
-      if (saved) return JSON.parse(saved);
+    if (typeof window === "undefined") {
+      return Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
     }
-    return Array.from({ length: 13 }, (_, i) => ({
-      sessionId: "",
-      highImpedance: "",
-      lowImpedance: "",
-      videos: Array(6).fill({
-        startTime: DEFAULT_TIME,
-        endTime: DEFAULT_TIME,
-        lastUpdated: null,
-        notes: "",
-      }),
-    }));
+    const saved = localStorage.getItem("sessions");
+    return saved
+      ? JSON.parse(saved)
+      : Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
   });
 
-  // Save to localStorage whenever sessions or currentSession changes
+  // Persist sessions data to localStorage
   useEffect(() => {
     localStorage.setItem("sessions", JSON.stringify(sessions));
   }, [sessions]);
 
+  // Persist current session index to localStorage
   useEffect(() => {
     localStorage.setItem("currentSession", currentSession.toString());
   }, [currentSession]);
 
   /**
-   * Updates session data fields
-   * @param {number} sessionIndex - Index of the session to update
-   * @param {keyof SessionData} field - Field to update
-   * @param {string} value - New value
+   * Updates session metadata fields
    */
   const handleSessionDataChange = (
     sessionIndex: number,
     field: keyof SessionData,
     value: string
   ) => {
-    setSessions((prev) => {
-      const newSessions = [...prev];
-      newSessions[sessionIndex] = {
-        ...newSessions[sessionIndex],
-        [field]: value,
-      };
-      return newSessions;
-    });
+    setSessions((prev) =>
+      prev.map((session, idx) =>
+        idx === sessionIndex ? { ...session, [field]: value } : session
+      )
+    );
   };
 
   /**
-   * Updates video timing data
-   * @param {number} sessionIndex - Index of the session
-   * @param {number} videoIndex - Index of the video
-   * @param {"startTime" | "endTime" | "notes"} field - Field to update
-   * @param {string} value - New value
+   * Updates video timing and notes data
    */
   const handleVideoTimeChange = (
     sessionIndex: number,
     videoIndex: number,
-    field: "startTime" | "endTime" | "notes",
+    field: keyof VideoData,
     value: string
   ) => {
-    setSessions((prev) => {
-      const newSessions = [...prev];
-      newSessions[sessionIndex].videos[videoIndex] = {
-        ...newSessions[sessionIndex].videos[videoIndex],
-        [field]: value,
-        lastUpdated:
-          field !== "notes"
-            ? new Date().toLocaleString()
-            : newSessions[sessionIndex].videos[videoIndex].lastUpdated,
-      };
-      return newSessions;
-    });
+    setSessions((prev) =>
+      prev.map((session, sIdx) =>
+        sIdx === sessionIndex
+          ? {
+              ...session,
+              videos: session.videos.map((video, vIdx) =>
+                vIdx === videoIndex
+                  ? {
+                      ...video,
+                      [field]: value,
+                      lastUpdated:
+                        field !== "notes"
+                          ? new Date().toLocaleString()
+                          : video.lastUpdated,
+                    }
+                  : video
+              ),
+            }
+          : session
+      )
+    );
   };
 
   /**
-   * Records current time for a video
-   * @param {number} videoIndex - Index of the video
-   * @param {"startTime" | "endTime"} timeType - Type of time to record
+   * Records current system time for a video's start/end time
    */
   const recordCurrentTime = (
     videoIndex: number,
     timeType: "startTime" | "endTime"
   ) => {
     const now = new Date();
-    const timeString = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+    const timeString = [now.getHours(), now.getMinutes(), now.getSeconds()]
+      .map((n) => String(n).padStart(2, "0"))
+      .join(":");
+
     handleVideoTimeChange(currentSession, videoIndex, timeType, timeString);
   };
 
   /**
-   * Clears all timings for current session
+   * Resets all video timings for current session to defaults
    */
   const clearSessionTimings = () => {
-    setSessions((prev) => {
-      const newSessions = [...prev];
-      newSessions[currentSession].videos = Array(6).fill({
-        startTime: DEFAULT_TIME,
-        endTime: DEFAULT_TIME,
-        lastUpdated: null,
-        notes: "",
-      });
-      return newSessions;
-    });
+    setSessions((prev) =>
+      prev.map((session, idx) =>
+        idx === currentSession
+          ? {
+              ...session,
+              videos: Array(VIDEOS_PER_SESSION)
+                .fill(null)
+                .map(createEmptyVideo),
+            }
+          : session
+      )
+    );
   };
 
   /**
-   * Navigates to next session if available
+   * Navigation handlers for moving between sessions
    */
-  const nextSession = () => {
-    if (currentSession < sessions.length - 1) {
-      setCurrentSession((curr) => curr + 1);
-    }
-  };
+  const nextSession = () =>
+    currentSession < sessions.length - 1 &&
+    setCurrentSession((curr) => curr + 1);
+  const prevSession = () =>
+    currentSession > 0 && setCurrentSession((curr) => curr - 1);
 
   /**
-   * Navigates to previous session if available
+   * Checks if a video has any timing data entered
    */
-  const prevSession = () => {
-    if (currentSession > 0) {
-      setCurrentSession((curr) => curr - 1);
-    }
-  };
-
-  /**
-   * Checks if a video has any timing data
-   * @param {{startTime: string, endTime: string}} video - Video timing data
-   * @returns {boolean} True if video has any timing data
-   */
-  const hasVideoTimes = (video: { startTime: string; endTime: string }) => {
+  const hasVideoTimes = (
+    video: Pick<VideoData, "startTime" | "endTime">
+  ): boolean => {
     return video.startTime !== "" || video.endTime !== "";
   };
 
   /**
-   * Shares current session data via WhatsApp
-   * Formats session data into a readable message and opens WhatsApp share dialog
+   * Formats and shares current session data via WhatsApp
    */
   const shareToWhatsApp = () => {
     const currentSessionData = sessions[currentSession];
@@ -214,14 +218,14 @@ impedence: H-${currentSessionData.highImpedance}/L-${
 TIMINGS:
 ${currentSessionData.videos
   .map(
-    (video, index) => `Video ${index + 1}:
+    (video, index) =>
+      `Video ${index + 1}:
 ${formatTime(video.startTime)}\t${formatTime(video.endTime)}
 Notes: ${video.notes || "No notes"}`
   )
   .join("\n\n")}`;
 
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encodedMessage}`, "_blank");
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
