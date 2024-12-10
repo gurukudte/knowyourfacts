@@ -140,10 +140,7 @@ export default function ToolRecording() {
                   ? {
                       ...video,
                       [field]: value,
-                      lastUpdated:
-                        field !== "notes"
-                          ? new Date().toLocaleString()
-                          : video.lastUpdated,
+                      lastUpdated: new Date().toLocaleString(), // Always update timestamp for any field change
                     }
                   : video
               ),
@@ -209,21 +206,21 @@ export default function ToolRecording() {
    */
   const shareToWhatsApp = () => {
     const currentSessionData = sessions[currentSession];
-    const message = `session : ${currentSession + 1}
-session ID: ${currentSessionData.sessionId}
-impedence: H-${currentSessionData.highImpedance}/L-${
-      currentSessionData.lowImpedance
-    }
-
-TIMINGS:
-${currentSessionData.videos
-  .map(
-    (video, index) =>
-      `Video ${index + 1}:
-${formatTime(video.startTime)}\t${formatTime(video.endTime)}
-Notes: ${video.notes || "No notes"}`
-  )
-  .join("\n\n")}`;
+    const message =
+      `Session : ${currentSession + 1}\n` +
+      `Session ID : ${currentSessionData.sessionId}\n` +
+      `impedence : H-${currentSessionData.highImpedance}/L-${currentSessionData.lowImpedance}\n` +
+      `TIMINGS:\n\n` +
+      `${currentSessionData.videos
+        .map(
+          (video) =>
+            `${formatTime(video.startTime)}\t${formatTime(video.endTime)}`
+        )
+        .join("\n")}\n\n` +
+      `NOTES:\n` +
+      `${currentSessionData.videos
+        .map((video, index) => `V${index + 1} - ${video.notes || "NO NOTES"}`)
+        .join("\n")}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
