@@ -1,199 +1,61 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SiGooglesheets } from "react-icons/si";
+import { useSession, VideoData } from "./hooks/useSessionHook";
+import useActions from "./hooks/useActionsHook";
+import useJsonHook from "./hooks/useJsonHook";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 /**
- * Represents the data structure for a single video within a session
- */
-interface VideoData {
-  startTime: string;
-  endTime: string;
-  lastUpdated: string | null;
-  notes: string;
-}
-
-/**
- * Represents the data structure for a complete session
- */
-interface SessionData {
-  sessionId: string;
-  highImpedance: string;
-  lowImpedance: string;
-  videos: VideoData[];
-}
-
-// Default time value used for new/reset video timings
-const DEFAULT_TIME = "00:00:00";
-
-// Number of sessions and videos per session
-const TOTAL_SESSIONS = 13;
-const VIDEOS_PER_SESSION = 6;
-
-/**
- * Formats a 24h time string to 12h format with AM/PM
- * @param timeStr - Time string in 24h format (HH:mm:ss)
- * @returns Formatted time string in 12h format (hh:mm:ss am/pm)
- */
-const formatTime = (timeStr: string): string => {
-  const date = new Date();
-  const [hours, minutes, seconds] = timeStr.split(":");
-  date.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds));
-  return date
-    .toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    })
-    .toLowerCase();
-};
-
-/**
- * Creates a new empty video data object
- */
-const createEmptyVideo = (): VideoData => ({
-  startTime: DEFAULT_TIME,
-  endTime: DEFAULT_TIME,
-  lastUpdated: null,
-  notes: "",
-});
-
-/**
- * Creates a new empty session data object
- */
-const createEmptySession = (): SessionData => ({
-  sessionId: "",
-  highImpedance: "",
-  lowImpedance: "",
-  videos: Array(VIDEOS_PER_SESSION).fill(null).map(createEmptyVideo),
-});
-
-/**
  * Tool Recording Component
- * Provides interface for recording and managing multiple sessions of video timing data
+ * Main page component for recording and managing video timing sessions.
+ * Provides interface for:
+ * - Selecting candidates
+ * - Navigating between sessions
+ * - Recording session data
+ * - Sharing data via WhatsApp
+ * - Updating data to Google Sheets
  */
 export default function ToolRecording() {
-  // Initialize current session from localStorage or default to 0
-  const [currentSession, setCurrentSession] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return parseInt(localStorage.getItem("currentSession") || "0");
+  const { loading, updateGoogleSheet } = useActions();
+  const {
+    sessionsData: { sessions, currentSession },
+    handlers: {
+      prevSession,
+      clearSessionTimings,
+      nextSession,
+      handleSessionDataChange,
+      recordCurrentTime,
+      handleVideoTimeChange,
+    },
+  } = useSession();
+  const { jsonContent } = useJsonHook();
+  const [candidate, setCandidate] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("candidate") || "";
   });
 
-  // Initialize sessions data from localStorage or create new empty sessions
-  const [sessions, setSessions] = useState<SessionData[]>(() => {
-    if (typeof window === "undefined") {
-      return Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
-    }
-    const saved = localStorage.getItem("sessions");
-    return saved
-      ? JSON.parse(saved)
-      : Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
-  });
-
-  // Persist sessions data to localStorage
-  useEffect(() => {
-    localStorage.setItem("sessions", JSON.stringify(sessions));
-  }, [sessions]);
-
-  // Persist current session index to localStorage
-  useEffect(() => {
-    localStorage.setItem("currentSession", currentSession.toString());
-  }, [currentSession]);
-
-  /**
-   * Updates session metadata fields
-   */
-  const handleSessionDataChange = (
-    sessionIndex: number,
-    field: keyof SessionData,
-    value: string
-  ) => {
-    setSessions((prev) =>
-      prev.map((session, idx) =>
-        idx === sessionIndex ? { ...session, [field]: value } : session
-      )
-    );
+  const handleDropdownChange = (value: string) => {
+    setCandidate(value);
   };
-
-  /**
-   * Updates video timing and notes data
-   */
-  const handleVideoTimeChange = (
-    sessionIndex: number,
-    videoIndex: number,
-    field: keyof VideoData,
-    value: string
-  ) => {
-    setSessions((prev) =>
-      prev.map((session, sIdx) =>
-        sIdx === sessionIndex
-          ? {
-              ...session,
-              videos: session.videos.map((video, vIdx) =>
-                vIdx === videoIndex
-                  ? {
-                      ...video,
-                      [field]: value,
-                      lastUpdated: new Date().toLocaleString(), // Always update timestamp for any field change
-                    }
-                  : video
-              ),
-            }
-          : session
-      )
-    );
-  };
-
-  /**
-   * Records current system time for a video's start/end time
-   */
-  const recordCurrentTime = (
-    videoIndex: number,
-    timeType: "startTime" | "endTime"
-  ) => {
-    const now = new Date();
-    const timeString = [now.getHours(), now.getMinutes(), now.getSeconds()]
-      .map((n) => String(n).padStart(2, "0"))
-      .join(":");
-
-    handleVideoTimeChange(currentSession, videoIndex, timeType, timeString);
-  };
-
-  /**
-   * Resets all video timings for current session to defaults
-   */
-  const clearSessionTimings = () => {
-    setSessions((prev) =>
-      prev.map((session, idx) =>
-        idx === currentSession
-          ? {
-              ...session,
-              videos: Array(VIDEOS_PER_SESSION)
-                .fill(null)
-                .map(createEmptyVideo),
-            }
-          : session
-      )
-    );
-  };
-
-  /**
-   * Navigation handlers for moving between sessions
-   */
-  const nextSession = () =>
-    currentSession < sessions.length - 1 &&
-    setCurrentSession((curr) => curr + 1);
-  const prevSession = () =>
-    currentSession > 0 && setCurrentSession((curr) => curr - 1);
 
   /**
    * Checks if a video has any timing data entered
+   * @param video Object containing start and end times
+   * @returns true if either start or end time is set
    */
   const hasVideoTimes = (
     video: Pick<VideoData, "startTime" | "endTime">
@@ -201,35 +63,33 @@ export default function ToolRecording() {
     return video.startTime !== "" || video.endTime !== "";
   };
 
-  /**
-   * Formats and shares current session data via WhatsApp
-   */
-  const shareToWhatsApp = () => {
-    const currentSessionData = sessions[currentSession];
-    const message =
-      `Session : ${currentSession + 1}\n` +
-      `Session ID : ${currentSessionData.sessionId}\n` +
-      `impedence : H-${currentSessionData.highImpedance}/L-${currentSessionData.lowImpedance}\n` +
-      `TIMINGS:\n\n` +
-      `${currentSessionData.videos
-        .map(
-          (video) =>
-            `${formatTime(video.startTime)}\t${formatTime(video.endTime)}`
-        )
-        .join("\n")}\n\n` +
-      `NOTES:\n` +
-      `${currentSessionData.videos
-        .map((video, index) => `V${index + 1} - ${video.notes || "NO NOTES"}`)
-        .join("\n")}`;
-
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
-  };
+  useEffect(() => {
+    localStorage.setItem("candidate", candidate);
+  }, [candidate]);
 
   return (
     <ScrollArea className="h-[100dvh] w-full">
       <div className="container p-4 space-y-4 max-w-lg mx-auto">
+        {/* Header section with candidate selection and session navigation */}
         <div className="sticky top-0 bg-background z-10 pb-2">
-          <h1 className="text-xl font-bold flex justify-center items-center">
+          <h1 className="text-xl font-bold flex justify-start items-center gap-10">
+            <div>
+              <Select
+                value={candidate}
+                onValueChange={(value) => handleDropdownChange(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="CANDIDATE" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(jsonContent).map((candidate) => (
+                    <SelectItem key={candidate} value={candidate}>
+                      {candidate}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             Session {currentSession + 1}/{sessions.length}
           </h1>
 
@@ -258,6 +118,7 @@ export default function ToolRecording() {
           </div>
         </div>
 
+        {/* Main session data recording interface */}
         <Card className="border-none shadow-none">
           <CardHeader className="p-4">
             <CardTitle className="text-lg">
@@ -267,6 +128,7 @@ export default function ToolRecording() {
           <CardContent className="p-4">
             <div className="space-y-4">
               <div className="space-y-4">
+                {/* Session ID input */}
                 <div className="space-y-2">
                   <Label htmlFor={`session-${currentSession}-id`}>
                     Session ID
@@ -284,6 +146,7 @@ export default function ToolRecording() {
                     placeholder="Enter Session ID"
                   />
                 </div>
+                {/* High impedance input */}
                 <div className="space-y-2">
                   <Label htmlFor={`session-${currentSession}-high`}>
                     High Impedance
@@ -301,6 +164,7 @@ export default function ToolRecording() {
                     placeholder="Enter High Impedance"
                   />
                 </div>
+                {/* Low impedance input */}
                 <div className="space-y-2">
                   <Label htmlFor={`session-${currentSession}-low`}>
                     Low Impedance
@@ -320,6 +184,7 @@ export default function ToolRecording() {
                 </div>
               </div>
 
+              {/* Video timing cards section */}
               <div className="mt-6">
                 <h3 className="text-base font-semibold mb-4">Video Timings</h3>
                 <div className="space-y-4">
@@ -422,7 +287,7 @@ export default function ToolRecording() {
                               )
                             }
                             placeholder="Add notes for this video..."
-                            className="min-h-[80px]"
+                            className="min-h-[80px] bg-white"
                           />
                         </div>
                       </CardContent>
@@ -434,14 +299,25 @@ export default function ToolRecording() {
           </CardContent>
         </Card>
 
-        <div className="space-y-2 sticky bottom-4">
+        {/* Action buttons for sharing and updating data */}
+        <div className="space-y-2 sticky bottom-4 ">
           <Button
             className="w-full"
             size="lg"
             variant="secondary"
-            onClick={shareToWhatsApp}
+            onClick={() => updateGoogleSheet(candidate)}
           >
-            Share to WhatsApp
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin">⏳</span>
+                Verifying...
+              </span>
+            ) : (
+              <>
+                Update to Google Sheets
+                <SiGooglesheets />
+              </>
+            )}
           </Button>
         </div>
       </div>
