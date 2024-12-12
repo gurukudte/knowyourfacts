@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
  * - Updating data to Google Sheets
  */
 export default function ToolRecording() {
-  const { loading, updateGoogleSheet } = useActions();
+  const { loading, updateGoogleSheet, shareToWhatsApp } = useActions();
   const {
     sessionsData: { sessions, currentSession },
     handlers: {
@@ -301,6 +301,16 @@ export default function ToolRecording() {
 
         {/* Action buttons for sharing and updating data */}
         <div className="space-y-2 sticky bottom-4 ">
+          <div className="space-y-2 sticky bottom-4">
+            <Button
+              className="w-full"
+              size="lg"
+              variant="secondary"
+              onClick={shareToWhatsApp}
+            >
+              Share to WhatsApp
+            </Button>
+          </div>
           <Button
             className="w-full"
             size="lg"

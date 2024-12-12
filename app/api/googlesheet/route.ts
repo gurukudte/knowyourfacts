@@ -23,8 +23,23 @@ export async function POST(request: Request) {
 
     // Load credentials from the service account key file
     const keyFilePath = path.join(process.cwd(), "credentials.json"); // Path to your JSON key file
-    const credentials = JSON.parse(await fs.readFile(keyFilePath, "utf8"));
-
+    // const credentials = JSON.parse(await fs.readFile(keyFilePath, "utf8"));
+    const credentials = {
+      type: process.env.GOOGLE_APPLICATION_CREDENTIALS_TYPE,
+      project_id: process.env.GOOGLE_APPLICATION_CREDENTIALS_project_id,
+      private_key_id: process.env.GOOGLE_APPLICATION_CREDENTIALS_private_key_id,
+      private_key: process.env.GOOGLE_APPLICATION_CREDENTIALS_private_key,
+      client_email: process.env.GOOGLE_APPLICATION_CREDENTIALS_client_email,
+      client_id: process.env.GOOGLE_APPLICATION_CREDENTIALS_client_id,
+      auth_uri: process.env.GOOGLE_APPLICATION_CREDENTIALS_auth_uri,
+      token_uri: process.env.GOOGLE_APPLICATION_CREDENTIALS_token_uri,
+      auth_provider_x509_cert_url:
+        process.env.GOOGLE_APPLICATION_CREDENTIALS_auth_provider_x509_cert_url,
+      client_x509_cert_url:
+        process.env.GOOGLE_APPLICATION_CREDENTIALS_client_x509_cert_url,
+      universe_domain:
+        process.env.GOOGLE_APPLICATION_CREDENTIALS_universe_domain,
+    };
     // Authenticate with Google Sheets API
     const auth = new google.auth.GoogleAuth({
       credentials,

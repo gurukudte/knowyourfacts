@@ -1,4 +1,4 @@
-import { SessionData, VideoData } from "./useSessionHook";
+import { SessionData, useSession, VideoData } from "./useSessionHook";
 import { formatTime } from "./useTimeHook";
 import useJsonHook from "./useJsonHook";
 import { toast } from "@/hooks/use-toast";
@@ -13,6 +13,9 @@ import { useState } from "react";
  */
 const useActions = () => {
   const { jsonContent } = useJsonHook();
+  const {
+    sessionsData: { sessions, currentSession },
+  } = useSession();
   const { getFromLocalStorage } = useLocalStorage();
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +33,32 @@ const useActions = () => {
       video.notes,
     ]);
     return data;
+  };
+
+  /**
+   * Formats and shares current session data via WhatsApp
+   */
+  const shareToWhatsApp = () => {
+    const currentSessionData = sessions[currentSession];
+    const message =
+      `Session : ${currentSession + 1}\n` +
+      `Session ID : ${currentSessionData.sessionId}\n` +
+      `impedence : H-${currentSessionData.highImpedance}K/L-${currentSessionData.lowImpedance}K\n` +
+      `TIMINGS:\n\n` +
+      `${currentSessionData.videos
+        .map(
+          (video) =>
+            `${
+              video.startTime !== "00:00:00" ? formatTime(video.startTime) : ""
+            }\t${video.endTime !== "00:00:00" ? formatTime(video.endTime) : ""}`
+        )
+        .join("\n")}\n\n` +
+      `NOTES:\n` +
+      `${currentSessionData.videos
+        .map((video) => `${video.notes || "NO NOTES"}`)
+        .join("\n")}`;
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   /**
@@ -97,7 +126,7 @@ const useActions = () => {
     }
   }
 
-  return { loading, updateGoogleSheet };
+  return { loading, shareToWhatsApp, updateGoogleSheet };
 };
 
 export default useActions;
