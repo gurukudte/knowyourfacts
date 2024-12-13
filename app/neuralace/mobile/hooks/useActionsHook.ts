@@ -13,9 +13,6 @@ import { useState } from "react";
  */
 const useActions = () => {
   const { jsonContent } = useJsonHook();
-  const {
-    sessionsData: { sessions, currentSession },
-  } = useSession();
   const { getFromLocalStorage } = useLocalStorage();
   const [loading, setLoading] = useState(false);
 
@@ -39,6 +36,8 @@ const useActions = () => {
    * Formats and shares current session data via WhatsApp
    */
   const shareToWhatsApp = () => {
+    const sessions = JSON.parse(getFromLocalStorage("sessions"));
+    const currentSession = JSON.parse(getFromLocalStorage("currentSession"));
     const currentSessionData = sessions[currentSession];
     const message =
       `Session : ${currentSession + 1}\n` +
@@ -47,7 +46,7 @@ const useActions = () => {
       `TIMINGS:\n\n` +
       `${currentSessionData.videos
         .map(
-          (video) =>
+          (video: VideoData) =>
             `${
               video.startTime !== "00:00:00" ? formatTime(video.startTime) : ""
             }\t${video.endTime !== "00:00:00" ? formatTime(video.endTime) : ""}`
@@ -55,7 +54,7 @@ const useActions = () => {
         .join("\n")}\n\n` +
       `NOTES:\n` +
       `${currentSessionData.videos
-        .map((video) => `${video.notes || "NO NOTES"}`)
+        .map((video: VideoData) => `${video.notes || "NO NOTES"}`)
         .join("\n")}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
