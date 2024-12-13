@@ -2,17 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SiGooglesheets } from "react-icons/si";
 import { useSession, VideoData } from "./hooks/useSessionHook";
 import useActions from "./hooks/useActionsHook";
-import useJsonHook from "./hooks/useJsonHook";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -42,15 +33,14 @@ export default function ToolRecording() {
       handleVideoTimeChange,
     },
   } = useSession();
-  const { jsonContent } = useJsonHook();
   const [candidate, setCandidate] = useState(() => {
     if (typeof window === "undefined") return "";
     return localStorage.getItem("candidate") || "";
   });
 
-  const handleDropdownChange = (value: string) => {
-    setCandidate(value);
-  };
+  // const handleDropdownChange = (value: string) => {
+  //   setCandidate(value);
+  // };
 
   /**
    * Checks if a video has any timing data entered
@@ -72,8 +62,8 @@ export default function ToolRecording() {
       <div className="container p-4 space-y-4 max-w-lg mx-auto">
         {/* Header section with candidate selection and session navigation */}
         <div className="sticky top-0 bg-background z-10 pb-2">
-          <h1 className="text-xl font-bold flex justify-start items-center gap-10">
-            <div>
+          <h1 className="text-xl font-bold flex justify-center items-center gap-10">
+            {/* <div>
               <Select
                 value={candidate}
                 onValueChange={(value) => handleDropdownChange(value)}
@@ -89,7 +79,7 @@ export default function ToolRecording() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
             Session {currentSession + 1}/{sessions.length}
           </h1>
 
@@ -301,17 +291,15 @@ export default function ToolRecording() {
 
         {/* Action buttons for sharing and updating data */}
         <div className="space-y-2 sticky bottom-4 ">
-          <div className="space-y-2 sticky bottom-4">
-            <Button
-              className="w-full"
-              size="lg"
-              variant="secondary"
-              onClick={shareToWhatsApp}
-            >
-              Share to WhatsApp
-            </Button>
-          </div>
           <Button
+            className="w-full"
+            size="lg"
+            variant="secondary"
+            onClick={shareToWhatsApp}
+          >
+            Share to WhatsApp
+          </Button>
+          {/* <Button
             className="w-full"
             size="lg"
             variant="secondary"
@@ -328,7 +316,7 @@ export default function ToolRecording() {
                 <SiGooglesheets />
               </>
             )}
-          </Button>
+          </Button> */}
         </div>
       </div>
     </ScrollArea>
