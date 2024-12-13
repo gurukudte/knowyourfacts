@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const jsonFilePath = path.join(
-  process.cwd(),
-  "app/neuralace/mobile/json/candidates.json"
-);
+const jsonFilePath = path.join("./tmp", "candidates.json");
 
 export async function GET() {
   try {
