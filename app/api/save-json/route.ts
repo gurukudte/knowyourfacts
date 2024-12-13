@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     await fs.writeFile(jsonFilePath, JSON.stringify(data, null, 2));
     return NextResponse.json({ message: "JSON file updated successfully" });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "Failed to update JSON file" },
       { status: 500 }
