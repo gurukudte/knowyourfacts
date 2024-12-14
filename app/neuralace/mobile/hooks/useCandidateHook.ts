@@ -22,6 +22,13 @@ const useCandidate = () => {
     sheetName: "",
     sheetRange: "",
   });
+  const [selectedCandidate, setSelectedCandidate] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("candidate") || "";
+  });
+  const handleDropdownChange = (value: string) => {
+    setSelectedCandidate(value);
+  };
 
   const loadAllData = async () => {
     try {
@@ -111,9 +118,12 @@ const useCandidate = () => {
   useEffect(() => {
     loadAllData();
   }, []);
+  useEffect(() => {
+    localStorage.setItem("candidate", selectedCandidate);
+  }, [selectedCandidate]);
   return {
-    states: { allData, editMode, newCandidate },
-    handlers: { handleAdd, handleEdit, setNewCandidate },
+    states: { allData, editMode, newCandidate, selectedCandidate },
+    handlers: { handleAdd, handleEdit, setNewCandidate, handleDropdownChange },
     apiCalls: { handleUpdate, handleDelete, handleSave },
   };
 };
