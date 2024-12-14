@@ -66,7 +66,7 @@ const useActions = () => {
    * Updates Google Sheet with current session data
    *
    * @description
-   * Sends a POST request to /api/googlesheet endpoint with formatted session data.
+   * Sends a POST request to /api/google-sheet endpoint with formatted session data.
    * The data is structured in rows where:
    * - First row contains session ID, session number and impedance values
    * - Each row represents a video with timing information
@@ -79,7 +79,7 @@ const useActions = () => {
     const sessions = getFromLocalStorage("sessions");
     if (
       candidate === "" ||
-      allData.map((data) => data.sheetName).includes(candidate)
+      !allData.map((data) => data.sheetName).includes(candidate)
     ) {
       toast({
         variant: "destructive",

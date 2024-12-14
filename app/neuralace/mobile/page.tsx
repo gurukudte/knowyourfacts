@@ -9,6 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SiGooglesheets } from "react-icons/si";
+import useCandidate from "./hooks/useCandidateHook";
 
 /**
  * Tool Recording Component
@@ -23,6 +32,10 @@ import { Textarea } from "@/components/ui/textarea";
 export default function ToolRecording() {
   const { loading, updateGoogleSheet, shareToWhatsApp } = useActions();
   const {
+    states: { allData, selectedCandidate },
+    handlers: { handleDropdownChange },
+  } = useCandidate();
+  const {
     sessionsData: { sessions, currentSession },
     handlers: {
       prevSession,
@@ -33,14 +46,7 @@ export default function ToolRecording() {
       handleVideoTimeChange,
     },
   } = useSession();
-  const [candidate, setCandidate] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem("candidate") || "";
-  });
-
-  // const handleDropdownChange = (value: string) => {
-  //   setCandidate(value);
-  // };
+  useCandidate;
 
   /**
    * Checks if a video has any timing data entered
@@ -53,33 +59,31 @@ export default function ToolRecording() {
     return video.startTime !== "" || video.endTime !== "";
   };
 
-  useEffect(() => {
-    localStorage.setItem("candidate", candidate);
-  }, [candidate]);
-
   return (
     <ScrollArea className="h-[100dvh] w-full">
       <div className="container p-4 space-y-4 max-w-lg mx-auto">
         {/* Header section with candidate selection and session navigation */}
         <div className="sticky top-0 bg-background z-10 pb-2">
-          <h1 className="text-xl font-bold flex justify-center items-center gap-10">
-            {/* <div>
+          <h1 className="text-xl font-bold flex justify-start items-center gap-10">
+            <div>
               <Select
-                value={candidate}
+                value={selectedCandidate}
                 onValueChange={(value) => handleDropdownChange(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="CANDIDATE" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(jsonContent).map((candidate) => (
-                    <SelectItem key={candidate} value={candidate}>
-                      {candidate}
-                    </SelectItem>
-                  ))}
+                  {allData
+                    .map((data) => data.sheetName)
+                    .map((candidate) => (
+                      <SelectItem key={candidate} value={candidate}>
+                        {candidate}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
-            </div> */}
+            </div>
             Session {currentSession + 1}/{sessions.length}
           </h1>
 
@@ -299,24 +303,26 @@ export default function ToolRecording() {
           >
             Share to WhatsApp
           </Button>
-          {/* <Button
-            className="w-full"
-            size="lg"
-            variant="secondary"
-            onClick={() => updateGoogleSheet(candidate)}
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin">⏳</span>
-                Verifying...
-              </span>
-            ) : (
-              <>
-                Update to Google Sheets
-                <SiGooglesheets />
-              </>
-            )}
-          </Button> */}
+          {selectedCandidate !== "" && (
+            <Button
+              className="w-full"
+              size="lg"
+              variant="secondary"
+              onClick={() => updateGoogleSheet(selectedCandidate)}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  Updating...
+                </span>
+              ) : (
+                <>
+                  Update to Google Sheets
+                  <SiGooglesheets />
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </ScrollArea>
