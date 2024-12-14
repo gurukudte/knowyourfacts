@@ -20,7 +20,7 @@
     "googleapis": "^144.0.0",
     "lucide-react": "^0.462.0",
     "mongoose": "^8.8.4",
-    "next": "^15.0.3",
+    "next": "15.0.3",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.4.0",

@@ -1,4 +1,3 @@
-import { ISheet } from "@/models/Sheet";
 import axios from "axios";
 import { CandidateData } from "../hooks/useCandidateHook";
 
