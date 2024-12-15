@@ -1,9 +1,9 @@
 import { SessionData, useSession, VideoData } from "./useSessionHook";
 import { formatTime } from "./useTimeHook";
-import useJsonHook from "./useJsonHook";
 import { toast } from "@/hooks/use-toast";
 import { useLocalStorage } from "@/hooks/localStorage";
 import { useState } from "react";
+import useCandidate from "./useCandidateHook";
 
 /**
  * Custom hook for handling WhatsApp sharing and Google Sheets integration
@@ -12,7 +12,9 @@ import { useState } from "react";
  * - Update session data to Google Sheets
  */
 const useActions = () => {
-  const { jsonContent } = useJsonHook();
+  const {
+    states: { allData },
+  } = useCandidate();
   const { getFromLocalStorage } = useLocalStorage();
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +66,7 @@ const useActions = () => {
    * Updates Google Sheet with current session data
    *
    * @description
-   * Sends a POST request to /api/googlesheet endpoint with formatted session data.
+   * Sends a POST request to /api/google-sheet endpoint with formatted session data.
    * The data is structured in rows where:
    * - First row contains session ID, session number and impedance values
    * - Each row represents a video with timing information
@@ -75,7 +77,10 @@ const useActions = () => {
   async function updateGoogleSheet(candidate: string) {
     setLoading(true);
     const sessions = getFromLocalStorage("sessions");
-    if (candidate === "" || !Object.keys(jsonContent).includes(candidate)) {
+    if (
+      candidate === "" ||
+      !allData.map((data) => data.sheetName).includes(candidate)
+    ) {
       toast({
         variant: "destructive",
         title: "Select Candidate",
@@ -99,6 +104,10 @@ const useActions = () => {
         ],
         [`SHIFT A`]
       );
+      const candidate = getFromLocalStorage("candidate");
+      const sheetRange = allData.filter(
+        (data) => data.sheetName === candidate
+      )[0].sheetRange;
       try {
         const response = await fetch("/api/googlesheet", {
           method: "POST",
@@ -106,9 +115,7 @@ const useActions = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            range: `${candidate}!${jsonContent[candidate].startRange}:${
-              jsonContent[candidate].startRange + 73
-            }`, // Specify the range to update
+            range: `${candidate}!${sheetRange}:${sheetRange + 73}`, // Specify the range to update
             values: sheetApiData,
           }),
         });
