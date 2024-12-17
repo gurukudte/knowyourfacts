@@ -9,7 +9,11 @@
 export const formatTime = (timeStr: string): string => {
   const date = new Date();
   const [hours, minutes, seconds] = timeStr.split(":");
-  date.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds));
+  date.setHours(
+    parseInt(hours),
+    parseInt(minutes),
+    parseInt(seconds ? seconds : "00")
+  );
   return date
     .toLocaleTimeString("en-US", {
       hour: "2-digit",
