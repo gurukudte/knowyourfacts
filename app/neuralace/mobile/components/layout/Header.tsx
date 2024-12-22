@@ -43,17 +43,10 @@ export function Header(props: IHeaderProps) {
             </Button>
             <Button
               size="sm"
-              onClick={() => {
-                currentSession === sessions.length - 1
-                  ? handleSessionData("isSessionInProcess", false)
-                  : navigateSession("next");
-              }}
+              disabled={currentSession === sessions.length - 1}
+              onClick={() => navigateSession("next")}
             >
-              {`${
-                currentSession === sessions.length - 1
-                  ? "Mark Complete"
-                  : "Next"
-              }`}
+              Next
             </Button>
           </div>
         </div>
