@@ -17,7 +17,7 @@ import useCandidate from "../hooks/useCandidateHook";
 
 export default function JsonEditor() {
   const {
-    states: { allData, editMode, newCandidate },
+    states: { allCandidateData, editMode, newCandidate },
     handlers: { handleAdd, handleEdit, setNewCandidate },
     apiCalls: { handleUpdate, handleDelete },
   } = useCandidate();
@@ -67,7 +67,7 @@ export default function JsonEditor() {
             {editMode ? "Update" : "Add New Entry"}
           </Button>
           <div className=" flex justify-center items-center">
-            {allData.length > 0 ? (
+            {allCandidateData.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -79,7 +79,7 @@ export default function JsonEditor() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allData.map((data, index) => (
+                  {allCandidateData.map((data, index) => (
                     <TableRow key={index}>
                       <TableCell>{data.sheetName}</TableCell>
                       <TableCell>{data.sheetRange}</TableCell>
@@ -108,7 +108,7 @@ export default function JsonEditor() {
             ) : (
               <div className="p-8">
                 <span className="flex items-center gap-2">
-                  {allData ? (
+                  {allCandidateData ? (
                     <>
                       <span>No Data</span>
                     </>
