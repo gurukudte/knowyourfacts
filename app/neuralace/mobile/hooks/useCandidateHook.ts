@@ -7,6 +7,7 @@ import {
   getAllSheetData,
   updateSheetData,
 } from "../sheet/api";
+import { useSession } from "./useSessionHook";
 
 export interface CandidateData {
   _id: string;
@@ -15,25 +16,18 @@ export interface CandidateData {
 }
 
 const useCandidate = () => {
-  const [allData, setAllData] = useState<CandidateData[]>([]);
+  const [allCandidateData, setAllCandidateData] = useState<CandidateData[]>([]);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [newCandidate, setNewCandidate] = useState<CandidateData>({
     _id: "",
     sheetName: "",
     sheetRange: "",
   });
-  const [selectedCandidate, setSelectedCandidate] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem("candidate") || "";
-  });
-  const handleDropdownChange = (value: string) => {
-    setSelectedCandidate(value);
-  };
 
   const loadAllData = async () => {
     try {
       const response = await getAllSheetData();
-      setAllData(response);
+      setAllCandidateData(response);
     } catch (err) {
       console.error("Error loading sheet data:", err);
       toast({
@@ -83,7 +77,7 @@ const useCandidate = () => {
 
   const handleEdit = (sheetName: string) => {
     setEditMode(sheetName);
-    const candidateData: any = allData.filter(
+    const candidateData: any = allCandidateData.filter(
       (data) => data.sheetName === sheetName
     );
     setNewCandidate(candidateData[0]);
@@ -118,12 +112,13 @@ const useCandidate = () => {
   useEffect(() => {
     loadAllData();
   }, []);
-  useEffect(() => {
-    localStorage.setItem("candidate", selectedCandidate);
-  }, [selectedCandidate]);
   return {
-    states: { allData, editMode, newCandidate, selectedCandidate },
-    handlers: { handleAdd, handleEdit, setNewCandidate, handleDropdownChange },
+    states: { allCandidateData, editMode, newCandidate },
+    handlers: {
+      handleAdd,
+      handleEdit,
+      setNewCandidate,
+    },
     apiCalls: { handleUpdate, handleDelete, handleSave },
   };
 };

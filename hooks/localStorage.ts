@@ -3,13 +3,13 @@ export const useLocalStorage = () => {
     const savedData = localStorage.getItem(itemName);
 
     if (savedData) {
-      return savedData;
+      return JSON.parse(savedData);
     } else {
       return null;
     }
   };
-  const setLocalStorage = (itemName: string, data: any) => {
-    localStorage.setItem(itemName, data);
+  const setToLocalStorage = (itemName: string, data: any) => {
+    localStorage.setItem(itemName, JSON.stringify(data));
   };
-  return { getFromLocalStorage, setLocalStorage };
+  return { getFromLocalStorage, setToLocalStorage };
 };

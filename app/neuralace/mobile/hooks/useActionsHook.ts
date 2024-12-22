@@ -1,45 +1,46 @@
-import { SessionData, useSession, VideoData } from "./useSessionHook";
+import {
+  ISessionData,
+  SessionData,
+  useSession,
+  VideoData,
+} from "./useSessionHook";
 import { formatTime } from "./useTimeHook";
-import { toast } from "@/hooks/use-toast";
 import { useLocalStorage } from "@/hooks/localStorage";
 import { useState } from "react";
 import useCandidate from "./useCandidateHook";
 
 /**
- * Custom hook for handling WhatsApp sharing and Google Sheets integration
- * Provides functions to:
- * - Format and share session data via WhatsApp
- * - Update session data to Google Sheets
+ * Custom hook for handling WhatsApp sharing and Google Sheets integration.
  */
 const useActions = () => {
   const {
-    states: { allData },
+    handlers: { handleSessionDataChange },
+  } = useSession();
+  const {
+    states: { allCandidateData },
   } = useCandidate();
   const { getFromLocalStorage } = useLocalStorage();
   const [loading, setLoading] = useState(false);
 
-  const formatSessionData = (session: SessionData, sessionIndex: number) => {
-    const data = session.videos.map((video: VideoData, index: number) => [
-      index === 0 ? session.sessionId : "", // First column only has sessionId in first row
-      index === 0 ? sessionIndex + 1 : "", // Second column only has session number in first row
+  const formatSessionData = (session: SessionData, sessionIndex: number) =>
+    session.videos.map((video: VideoData, index: number) => [
+      index === 0 ? session.sessionId : "", // Session ID in the first row
+      index === 0 ? sessionIndex + 1 : "", // Session number in the first row
       index + 1, // Video number
       video.startTime !== "00:00:00" ? formatTime(video.startTime) : "", // Start time
-      video.startTime !== "00:00:00" ? formatTime(video.endTime) : "", // End time
+      video.endTime !== "00:00:00" ? formatTime(video.endTime) : "", // End time
       `${formatTime(video.startTime)} - ${formatTime(video.endTime)}`, // Time range
       index === 0
         ? `H-${session.highImpedance}K/L-${session.lowImpedance}K`
-        : "", // Impedance only in first row
-      video.notes,
+        : "", // Impedance in the first row
+      video.notes || "NO NOTES", // Video notes
     ]);
-    return data;
-  };
 
-  /**
-   * Formats and shares current session data via WhatsApp
-   */
   const shareToWhatsApp = () => {
-    const sessions = JSON.parse(getFromLocalStorage("sessions"));
-    const currentSession = JSON.parse(getFromLocalStorage("currentSession"));
+    const sessions = getFromLocalStorage("sessions") as SessionData[];
+    const { currentSession } = getFromLocalStorage(
+      "sessionData"
+    ) as ISessionData;
     const currentSessionData = sessions[currentSession];
     const message =
       `Session : ${currentSession + 1}\n` +
@@ -62,75 +63,80 @@ const useActions = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
-  /**
-   * Updates Google Sheet with current session data
-   *
-   * @description
-   * Sends a POST request to /api/google-sheet endpoint with formatted session data.
-   * The data is structured in rows where:
-   * - First row contains session ID, session number and impedance values
-   * - Each row represents a video with timing information
-   * - Range is hardcoded to "TEST!A314:G319"
-   *
-   * @throws {Error} If the API request fails or returns non-OK status
-   */
-  async function updateGoogleSheet(candidate: string) {
-    setLoading(true);
+  const updateGoogleSheet = async (candidate: string) => {
+    const currentSession = getFromLocalStorage("sessionData").currentSession;
     const sessions = getFromLocalStorage("sessions");
-    if (
-      candidate === "" ||
-      !allData.map((data) => data.sheetName).includes(candidate)
-    ) {
-      toast({
-        variant: "destructive",
-        title: "Select Candidate",
-        description: "Please select candidate or ask admin to add your name",
-      });
-      setLoading(false);
-    } else if (sessions) {
-      const sessionsData = JSON.parse(sessions) as SessionData[];
-      const sheetData = sessionsData.map((session, sessionIndex) =>
-        formatSessionData(session, sessionIndex)
-      );
 
-      const sheetApiData = sheetData.flat();
-      sheetApiData.unshift(
+    if (sessions) {
+      const sessionsData = sessions as SessionData[];
+      const sheetData = sessionsData.map(formatSessionData).flat();
+
+      // Prepend date and shift
+      sheetData.unshift(
         [
-          `${new Date().toLocaleDateString("en-GB", {
+          new Date().toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "short",
             year: "numeric",
-          })}`,
+          }),
         ],
-        [`SHIFT A`]
+        ["SHIFT A"]
       );
-      const candidate = getFromLocalStorage("candidate");
-      const sheetRange = allData.filter(
+
+      const { sheetRange } = allCandidateData.find(
         (data) => data.sheetName === candidate
-      )[0].sheetRange;
+      )!;
+      const ranges = [
+        { startRange: 0, endRange: 7 },
+        { startRange: 8, endRange: 13 },
+        { startRange: 14, endRange: 19 },
+        { startRange: 20, endRange: 25 },
+        { startRange: 26, endRange: 31 },
+        { startRange: 32, endRange: 37 },
+        { startRange: 38, endRange: 43 },
+        { startRange: 44, endRange: 49 },
+        { startRange: 50, endRange: 55 },
+        { startRange: 56, endRange: 61 },
+        { startRange: 62, endRange: 67 },
+        { startRange: 68, endRange: 73 },
+        { startRange: 74, endRange: 79 },
+      ];
+
+      const modifiedData = sheetData.slice(
+        ranges[currentSession].startRange,
+        ranges[currentSession].endRange + 1
+      );
+
       try {
+        setLoading(true);
         const response = await fetch("/api/googlesheet", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            range: `${candidate}!${sheetRange}:${sheetRange + 73}`, // Specify the range to update
-            values: sheetApiData,
+            range: `${candidate}!${
+              Number(sheetRange) + ranges[currentSession].startRange
+            }:${Number(sheetRange) + ranges[currentSession].endRange}`,
+            values: modifiedData,
           }),
         });
+
         const data = await response.json();
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(data.error || "Failed to update sheet");
-        }
         console.log("Success:", data.message);
-        setLoading(false);
+        handleSessionDataChange(currentSession, "sheetUpdate", {
+          isUpdated: true,
+          lastUpdated: new Date().toString(),
+        });
       } catch (error) {
         console.error("Error:", error);
+      } finally {
         setLoading(false);
       }
     }
-  }
+  };
 
   return { loading, shareToWhatsApp, updateGoogleSheet };
 };

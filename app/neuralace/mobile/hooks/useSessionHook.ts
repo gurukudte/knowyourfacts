@@ -1,20 +1,14 @@
 import { useLocalStorage } from "@/hooks/localStorage";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { calculateDaysUntil } from "../utils/googlesheets";
+import { convertDate } from "../utils/dateFormatter";
 
-/**
- * Default time value used for new video entries
- */
+// Configuration constants
 const DEFAULT_TIME = "00:00:00";
-
-/**
- * Configuration constants
- */
-const TOTAL_SESSIONS = 12;
+const TOTAL_SESSIONS = 13;
 const VIDEOS_PER_SESSION = 6;
 
-/**
- * Represents timing and note data for a single video recording
- */
+// Interfaces for session and video data
 export interface VideoData {
   startTime: string;
   endTime: string;
@@ -22,19 +16,25 @@ export interface VideoData {
   notes: string;
 }
 
-/**
- * Represents all data associated with a recording session
- */
 export interface SessionData {
   sessionId: string;
   highImpedance: string;
   lowImpedance: string;
   videos: VideoData[];
+  sheetUpdate: {
+    lastUpdated: null | string;
+    isUpdated: boolean;
+  };
 }
 
-/**
- * Creates a new empty video entry with default values
- */
+export interface ISessionData {
+  currentSession: number;
+  sessionDate: string;
+  sessionCandidate: string;
+  isSessionInProcess: boolean;
+}
+
+// Utility functions
 const createEmptyVideo = (): VideoData => ({
   startTime: DEFAULT_TIME,
   endTime: DEFAULT_TIME,
@@ -42,150 +42,168 @@ const createEmptyVideo = (): VideoData => ({
   notes: "",
 });
 
-/**
- * Creates a new empty session with default values
- */
 const createEmptySession = (): SessionData => ({
   sessionId: "",
   highImpedance: "",
   lowImpedance: "",
-  videos: Array(VIDEOS_PER_SESSION).fill(null).map(createEmptyVideo),
+  sheetUpdate: {
+    lastUpdated: null,
+    isUpdated: false,
+  },
+  videos: Array.from({ length: VIDEOS_PER_SESSION }, createEmptyVideo),
 });
 
-/**
- * Custom hook for managing recording session state
- * Handles session navigation, data persistence, and timing operations
- */
 export const useSession = () => {
-  const { getFromLocalStorage } = useLocalStorage();
-  // Initialize current session from localStorage or default to 0
-  const [currentSession, setCurrentSession] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return parseInt(localStorage.getItem("currentSession") || "0");
-  });
+  const { getFromLocalStorage, setToLocalStorage } = useLocalStorage();
 
-  // Initialize sessions data from localStorage or create new empty sessions
+  const isSSR = typeof window === "undefined";
+
+  // Initialize sessions and sessionData state
   const [sessions, setSessions] = useState<SessionData[]>(() => {
-    if (typeof window === "undefined") {
-      return Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
-    }
+    if (isSSR)
+      return Array.from({ length: TOTAL_SESSIONS }, createEmptySession);
     const saved = getFromLocalStorage("sessions");
     return saved
-      ? JSON.parse(saved)
-      : Array(TOTAL_SESSIONS).fill(null).map(createEmptySession);
+      ? saved
+      : Array.from({ length: TOTAL_SESSIONS }, createEmptySession);
   });
 
-  /**
-   * Updates session metadata (sessionId, impedance values)
-   */
+  const [sessionData, setSessionData] = useState<ISessionData>(() => {
+    const defaultSessionData: ISessionData = {
+      currentSession: 0,
+      sessionDate: convertDate(new Date().toString()),
+      sessionCandidate: "",
+      isSessionInProcess: false,
+    };
+    if (isSSR) return defaultSessionData;
+    const saved = getFromLocalStorage("sessionData");
+    return saved ? saved : defaultSessionData;
+  });
+
+  // Handlers
+  const handleSessionData = (
+    field: keyof ISessionData,
+    value: boolean | string | number
+  ) => {
+    console.log(field, value);
+    setSessionData((prev) => {
+      const updatedData = { ...prev, [field]: value };
+      if (field === "isSessionInProcess") {
+        if (value) {
+          const newSessions = Array.from(
+            { length: TOTAL_SESSIONS },
+            createEmptySession
+          );
+          setSessions(newSessions);
+          setToLocalStorage("sessions", newSessions);
+          updatedData.isSessionInProcess = true;
+        } else {
+          updatedData.isSessionInProcess = false;
+          updatedData.currentSession = 0;
+        }
+      }
+      return updatedData;
+    });
+  };
+
   const handleSessionDataChange = (
     sessionIndex: number,
     field: keyof SessionData,
-    value: string
+    value: SessionData[keyof SessionData]
   ) => {
-    setSessions((prev) =>
-      prev.map((session, idx) =>
-        idx === sessionIndex ? { ...session, [field]: value } : session
-      )
-    );
+    console.log("sessionIndex:", sessionIndex);
+    setSessions((prev) => {
+      const updatedSessions = [...prev];
+      updatedSessions[sessionIndex] = {
+        ...prev[sessionIndex],
+        [field]: value,
+      };
+      return updatedSessions;
+    });
   };
 
-  /**
-   * Updates video timing data and notes, includes timestamp of last update
-   */
   const handleVideoTimeChange = (
     sessionIndex: number,
     videoIndex: number,
     field: keyof VideoData,
     value: string
   ) => {
-    setSessions((prev) =>
-      prev.map((session, sIdx) =>
-        sIdx === sessionIndex
-          ? {
-              ...session,
-              videos: session.videos.map((video, vIdx) =>
-                vIdx === videoIndex
-                  ? {
-                      ...video,
-                      [field]: value,
-                      lastUpdated: new Date().toLocaleString(),
-                    }
-                  : video
-              ),
-            }
-          : session
-      )
-    );
+    setSessions((prev) => {
+      const updatedSessions = [...prev];
+      const updatedVideos = [...updatedSessions[sessionIndex].videos];
+      updatedVideos[videoIndex] = {
+        ...updatedVideos[videoIndex],
+        [field]: value,
+        lastUpdated: new Date().toLocaleString(),
+      };
+      updatedSessions[sessionIndex].videos = updatedVideos;
+      return updatedSessions;
+    });
   };
 
-  /**
-   * Records current system time for a video's start/end time
-   */
   const recordCurrentTime = (
     videoIndex: number,
     timeType: "startTime" | "endTime"
   ) => {
-    const now = new Date();
-    const timeString = [now.getHours(), now.getMinutes(), now.getSeconds()]
-      .map((n) => String(n).padStart(2, "0"))
-      .join(":");
-
-    handleVideoTimeChange(currentSession, videoIndex, timeType, timeString);
-  };
-
-  /**
-   * Resets all video timings for current session to defaults
-   */
-  const clearSessionTimings = () => {
-    setSessions((prev) =>
-      prev.map((session, idx) =>
-        idx === currentSession
-          ? {
-              ...session,
-              videos: Array(VIDEOS_PER_SESSION)
-                .fill(null)
-                .map(createEmptyVideo),
-            }
-          : session
-      )
+    const timeString = new Date().toLocaleTimeString("en-GB", {
+      hour12: false,
+    });
+    handleVideoTimeChange(
+      sessionData.currentSession,
+      videoIndex,
+      timeType,
+      timeString
     );
   };
 
-  /**
-   * Navigation handlers for moving between sessions
-   */
-  const nextSession = () =>
-    currentSession < sessions.length - 1 &&
-    setCurrentSession((curr) => curr + 1);
+  const clearSessionTimings = () => {
+    setSessions((prev) => {
+      const updatedSessions = [...prev];
+      updatedSessions[sessionData.currentSession] = createEmptySession();
+      return updatedSessions;
+    });
+  };
 
-  const prevSession = () =>
-    currentSession > 0 && setCurrentSession((curr) => curr - 1);
+  const navigateSession = (direction: "next" | "prev") => {
+    setSessionData((prev) => {
+      const newIndex =
+        direction === "next"
+          ? Math.min(prev.currentSession + 1, sessions.length - 1)
+          : Math.max(prev.currentSession - 1, 0);
+      return { ...prev, currentSession: newIndex };
+    });
+  };
 
-  // Persist sessions data to localStorage whenever it changes
+  // Persist state to localStorage
   useEffect(() => {
-    localStorage.setItem("sessions", JSON.stringify(sessions));
+    setToLocalStorage("sessions", sessions);
   }, [sessions]);
 
-  /**
-   * Persists current session index to localStorage whenever it changes
-   */
   useEffect(() => {
-    localStorage.setItem("currentSession", currentSession.toString());
-  }, [currentSession]);
+    setToLocalStorage("sessionData", sessionData);
+  }, [sessionData]);
+
+  const isNewDay = useMemo(
+    () => !sessionData.isSessionInProcess,
+    [sessionData.isSessionInProcess]
+  );
 
   return {
     sessionsData: {
       sessions,
-      currentSession,
+      currentSession: sessionData.currentSession,
+      selectedCandidate: sessionData.sessionCandidate,
+      sessionDate: sessionData.sessionDate,
+      isSessionInProcess: sessionData.isSessionInProcess,
+      isNewDay,
     },
     handlers: {
       handleSessionDataChange,
       handleVideoTimeChange,
       recordCurrentTime,
       clearSessionTimings,
-      nextSession,
-      prevSession,
+      navigateSession,
+      handleSessionData,
     },
   };
 };
