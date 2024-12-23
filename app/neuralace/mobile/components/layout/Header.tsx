@@ -34,13 +34,7 @@ export function Header(props: IHeaderProps) {
             >
               Previous
             </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={clearSessionTimings}
-            >
-              Clear Session
-            </Button>
+
             <Button
               size="sm"
               disabled={currentSession === sessions.length - 1}
