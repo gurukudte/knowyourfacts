@@ -16,7 +16,11 @@ import { TbBrandWhatsappFilled } from "react-icons/tb";
 
 export function CustomDialog() {
   const {
-    data: { selectedCandidate, loading },
+    data: {
+      selectedCandidate,
+      loading,
+      sessionsData: { currentSession, sessions },
+    },
     handlers: { shareToWhatsApp, updateGoogleSheet, handleSessionData },
   } = useSessionContext();
 
@@ -32,13 +36,15 @@ export function CustomDialog() {
           <DialogTitle>Update session</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 items-center">
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => handleSessionData("isSessionInProcess", false)}
-          >
-            Mark Complete
-          </Button>
+          {currentSession === sessions.length - 1 && (
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => handleSessionData("isSessionInProcess", false)}
+            >
+              Mark Complete
+            </Button>
+          )}
           <Button className="w-full" size="lg" onClick={shareToWhatsApp}>
             Share to WhatsApp
             <TbBrandWhatsappFilled />
