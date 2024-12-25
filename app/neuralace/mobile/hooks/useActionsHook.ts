@@ -126,10 +126,6 @@ const useActions = () => {
         if (!response.ok)
           throw new Error(data.error || "Failed to update sheet");
         console.log("Success:", data.message);
-        handleSessionDataChange(currentSession, "sheetUpdate", {
-          isUpdated: true,
-          lastUpdated: new Date().toString(),
-        });
       } catch (error) {
         console.error("Error:", error);
       } finally {
