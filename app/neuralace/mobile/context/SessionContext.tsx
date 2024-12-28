@@ -48,6 +48,7 @@ interface ISessionContext {
     ) => void;
     updateGoogleSheet: (candidate: string) => void;
     shareToWhatsApp: () => void;
+    shareAllToWhatsApp: () => void;
     handleSessionData: (
       field: keyof ISessionData,
       value: boolean | string | number
@@ -74,7 +75,8 @@ interface ISessionProvider {
 export const SessionContextProvider: React.FC<ISessionProvider> = ({
   children,
 }: ISessionProvider) => {
-  const { loading, updateGoogleSheet, shareToWhatsApp } = useActions();
+  const { loading, updateGoogleSheet, shareToWhatsApp, shareAllToWhatsApp } =
+    useActions();
   const {
     sessionsData: {
       sessions,
@@ -120,6 +122,7 @@ export const SessionContextProvider: React.FC<ISessionProvider> = ({
           updateGoogleSheet,
           shareToWhatsApp,
           handleSessionData,
+          shareAllToWhatsApp,
         },
       }}
     >
