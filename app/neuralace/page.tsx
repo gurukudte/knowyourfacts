@@ -28,7 +28,7 @@ export default function MainRecording() {
       handleSessionDataChange,
       recordCurrentTime,
       handleVideoTimeChange,
-      shareToWhatsApp,
+      shareAllToWhatsApp,
       navigateSession,
       clearSessionTimings,
     },
@@ -267,14 +267,16 @@ export default function MainRecording() {
           </Card>
         </div>
       </main>
-      <footer className="w-full fixed bottom-0 p-4 bg-secondary">
-        <div className="flex flex-col gap-2">
-          <Button className="w-full" size="lg" onClick={shareToWhatsApp}>
-            Share to WhatsApp
-            <TbBrandWhatsappFilled />
-          </Button>
-        </div>
-      </footer>
+      {currentSession === sessions.length - 1 && (
+        <footer className="w-full fixed bottom-0 p-4 bg-secondary">
+          <div className="flex flex-col gap-2">
+            <Button className="w-full" size="lg" onClick={shareAllToWhatsApp}>
+              Share to WhatsApp
+              <TbBrandWhatsappFilled />
+            </Button>
+          </div>
+        </footer>
+      )}
     </>
   );
 }
