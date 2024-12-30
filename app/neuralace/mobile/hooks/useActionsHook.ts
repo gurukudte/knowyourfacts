@@ -119,19 +119,19 @@ const useActions = () => {
         (data) => data.sheetName === candidate
       )!;
       const ranges = [
-        { startRange: 0, endRange: 7 },
-        { startRange: 8, endRange: 13 },
-        { startRange: 14, endRange: 19 },
-        { startRange: 20, endRange: 25 },
-        { startRange: 26, endRange: 31 },
-        { startRange: 32, endRange: 37 },
-        { startRange: 38, endRange: 43 },
-        { startRange: 44, endRange: 49 },
-        { startRange: 50, endRange: 55 },
-        { startRange: 56, endRange: 61 },
-        { startRange: 62, endRange: 67 },
-        { startRange: 68, endRange: 73 },
-        { startRange: 74, endRange: 79 },
+        { startRange: 0, endRange: 8 },
+        { startRange: 9, endRange: 15 },
+        { startRange: 16, endRange: 22 },
+        { startRange: 23, endRange: 29 },
+        { startRange: 30, endRange: 36 },
+        { startRange: 37, endRange: 43 },
+        { startRange: 44, endRange: 50 },
+        { startRange: 51, endRange: 57 },
+        { startRange: 58, endRange: 64 },
+        { startRange: 65, endRange: 71 },
+        { startRange: 72, endRange: 78 },
+        { startRange: 79, endRange: 85 },
+        { startRange: 86, endRange: 92 },
       ];
 
       const modifiedData = sheetData.slice(
