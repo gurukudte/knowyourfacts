@@ -6,7 +6,7 @@ import { convertDate } from "../utils/dateFormatter";
 // Configuration constants
 const DEFAULT_TIME = "00:00:00";
 const TOTAL_SESSIONS = 13;
-const VIDEOS_PER_SESSION = 6;
+const VIDEOS_PER_SESSION = 7;
 
 // Interfaces for session and video data
 export interface VideoData {
