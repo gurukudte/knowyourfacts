@@ -62,6 +62,38 @@ const useActions = () => {
 
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
+  const shareAllToWhatsApp = () => {
+    const sessions = getFromLocalStorage("sessions") as SessionData[];
+
+    const message = sessions
+      .map((currentSessionData, currentSession) => {
+        return (
+          `Session : ${currentSession + 1}\n` +
+          `Session ID : ${currentSessionData.sessionId}\n` +
+          `impedence : H-${currentSessionData.highImpedance}K/L-${currentSessionData.lowImpedance}K\n` +
+          `TIMINGS:\n\n` +
+          `${currentSessionData.videos
+            .map(
+              (video: VideoData) =>
+                `${
+                  video.startTime !== "00:00:00"
+                    ? formatTime(video.startTime)
+                    : ""
+                }\t${
+                  video.endTime !== "00:00:00" ? formatTime(video.endTime) : ""
+                }`
+            )
+            .join("\n")}\n\n` +
+          `NOTES:\n` +
+          `${currentSessionData.videos
+            .map((video: VideoData) => `${video.notes || "NO NOTES"}`)
+            .join("\n")}`
+        );
+      })
+      .join("\n\n\n");
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+  };
 
   const updateGoogleSheet = async (candidate: string) => {
     const currentSession = getFromLocalStorage("sessionData").currentSession;
@@ -134,7 +166,7 @@ const useActions = () => {
     }
   };
 
-  return { loading, shareToWhatsApp, updateGoogleSheet };
+  return { loading, shareToWhatsApp, updateGoogleSheet, shareAllToWhatsApp };
 };
 
 export default useActions;
