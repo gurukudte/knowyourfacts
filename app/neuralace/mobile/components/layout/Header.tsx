@@ -23,7 +23,7 @@ export function Header() {
         <div className="flex flex-col gap-4 bg-background z-10">
           <div className="relative flex justify-center items-center">
             <h1 className="w-full text-xl font-bold text-center">
-              Session {currentSession + 1}/13
+              Session {currentSession + 1}/{TOTAL_SESSIONS}
             </h1>
           </div>
           <div className="flex items-center justify-between gap-2">
