@@ -2,15 +2,35 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { calculateDaysUntil } from "../../utils/googlesheets";
 import { CustomDialog } from "../Dialog";
-import { useAppSelector } from "../../store/hooks";
-import { useDispatch } from "react-redux";
-import { toggleSessionInProgress } from "../../store/slices/sessionSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  retrieveFromDatabase,
+  toggleSessionInProgress,
+} from "../../store/slices/sessionSlice";
 
 export function Footer() {
-  const { date, candidateName, isSessionInProgress } = useAppSelector(
-    (state) => state.session
-  );
-  const dispatch = useDispatch();
+  const {
+    date,
+    candidateName,
+    isSessionInProgress,
+    currentSession,
+    sessions,
+    ...other
+  } = useAppSelector((state) => state.session);
+  const dispatch = useAppDispatch();
+  const startSessions = () => {
+    dispatch(toggleSessionInProgress(true));
+    dispatch(
+      retrieveFromDatabase({
+        date,
+        candidateName,
+        isSessionInProgress,
+        currentSession,
+        sessions,
+        ...other,
+      })
+    );
+  };
 
   return (
     <footer className="w-full fixed bottom-0 p-4 bg-secondary">
@@ -20,9 +40,7 @@ export function Footer() {
           variant="destructive"
           className="w-full hover:bg-red-700"
           disabled={!(candidateName !== "" && calculateDaysUntil(date) === 0)}
-          onClick={() => {
-            dispatch(toggleSessionInProgress(true));
-          }}
+          onClick={startSessions}
         >
           Clear all sessions & Start New
         </Button>

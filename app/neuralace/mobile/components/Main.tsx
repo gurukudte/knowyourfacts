@@ -8,9 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   setVideoTimeChange,
+  updateDatabase,
   updateSession,
 } from "../store/slices/sessionSlice";
 import { VideoData } from "../types/sessionTypes";
+import { useEffect } from "react";
 
 /**
  * Tool Recording Component
@@ -23,7 +25,10 @@ import { VideoData } from "../types/sessionTypes";
  * - Updating data to Google Sheets
  */
 export default function MainRecording() {
-  const { currentSession, sessions } = useAppSelector((state) => state.session);
+  const { currentSession, sessions, ...other } = useAppSelector(
+    (state) => state.session
+  );
+  const store = useAppSelector((state) => state.session);
   const dispatch = useAppDispatch();
 
   /**
@@ -62,6 +67,9 @@ export default function MainRecording() {
     handleVideoTimeChange(value, videoIndex, field);
   };
 
+  useEffect(() => {
+    dispatch(updateDatabase({ currentSession, sessions, ...other }));
+  }, [sessions]);
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">

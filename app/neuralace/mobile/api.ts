@@ -24,17 +24,32 @@ export const updateCandidateSessionsData = async (id: string, data: any) => {
     return error;
   }
 };
-export const getCandidateSessionsData = async (data: {
-  candidateName: string;
-  date: string;
-}) => {
+export const getCandidateSessionsData = async (
+  candidateName: string,
+  date: string
+) => {
   try {
     const res = await axios({
       method: "get",
-      url: `/api/candidate-sessions?candidateName=${data.candidateName}&date=${data.date}`,
+      url: `/api/candidate-sessions?candidateName=${candidateName}&date=${date}`,
     });
     return res.data;
   } catch (error) {
     return error;
   }
 };
+
+// export const getCandidateSessionsData = async (
+//   candidateName: string,
+//   date: string
+// ) => {
+//   try {
+//     const res = await axios({
+//       method: "get",
+//       url: `/api/candidate-sessions?candidateName=${candidateName}&date=${date}`,
+//     });
+//     return res.data;
+//   } catch (error) {
+//     return error;
+//   }
+// };

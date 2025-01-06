@@ -28,8 +28,6 @@ export interface SessionsData {
 export interface SessionDataDocument extends Document {
   candidateName: string | null;
   date: string | null;
-  isCreated: boolean;
-  lastUpdated: string | null;
   sessions: SessionsData[] | null;
 }
 
@@ -52,13 +50,14 @@ const CandidateSessionDataSchema = new Schema<SessionsData>({
     isUpdated: { type: Boolean, default: false },
   },
 });
-const CandidateSessionsDataSchema = new Schema<SessionDataDocument>({
-  candidateName: { type: String, required: true },
-  date: { type: String, required: true },
-  isCreated: { type: Boolean, default: false },
-  lastUpdated: { type: String, required: true },
-  sessions: { type: [CandidateSessionDataSchema], default: [] },
-});
+const CandidateSessionsDataSchema = new Schema<SessionDataDocument>(
+  {
+    candidateName: { type: String, required: true },
+    date: { type: String, required: true },
+    sessions: { type: [CandidateSessionDataSchema], default: [] },
+  },
+  { timestamps: true }
+);
 
 export default mongoose.models.CandidateSessions ||
   mongoose.model<SessionDataDocument>(

@@ -1,9 +1,14 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   CandidateSessionsData,
   SessionData,
   VideoData,
 } from "../../types/sessionTypes";
+import {
+  createCandidateSessionsData,
+  getCandidateSessionsData,
+  updateCandidateSessionsData,
+} from "../../api";
 
 // Configuration constants
 export const DEFAULT_TIME = "00:00:00";
@@ -31,6 +36,7 @@ const createEmptySession = (): SessionData => ({
 
 // Initial State
 const initialState: CandidateSessionsData = {
+  id: "",
   candidateName: "",
   currentSession: 0,
   sessions: Array.from({ length: TOTAL_SESSIONS }, createEmptySession),
@@ -130,7 +136,71 @@ const sessionSlice = createSlice({
       state.sessions = updatedSessions;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(updateDatabase.fulfilled, (state, action) => {
+      const { _id, updatedAt } = action.payload;
+      state.lastUpdated = updatedAt;
+      state.isCreated = true;
+      state.id = _id;
+    });
+    builder.addCase(retrieveFromDatabase.fulfilled, (state, action) => {
+      state.lastUpdated = action?.payload?.updatedAt
+        ? action?.payload?.updatedAt
+        : null;
+      state.isCreated = action?.payload?._id ? true : false;
+      state.id = action?.payload?._id ? action?.payload?._id : "";
+    });
+  },
 });
+
+export const updateDatabase = createAsyncThunk(
+  "candidateSessions/updateDatabase",
+  async (state: CandidateSessionsData, { rejectWithValue }) => {
+    try {
+      const {
+        sessions,
+        isCreated,
+        lastUpdated,
+        id,
+        currentSession,
+        isSessionInProgress,
+        ...otherData
+      } = state;
+      const apiSessions = sessions.filter(
+        (session) => session.sessionId !== ""
+      );
+      const apiData = {
+        ...otherData,
+        sessions: apiSessions.map((session, index) => ({
+          ...session,
+          session: index + 1,
+        })),
+      };
+
+      if (!isCreated) {
+        const res = await createCandidateSessionsData(apiData);
+        return res.data;
+      } else {
+        const res = await updateCandidateSessionsData(id, apiData);
+        return res.data;
+      }
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+export const retrieveFromDatabase = createAsyncThunk(
+  "candidateSessions/retrieveFromDatabase",
+  async (state: CandidateSessionsData, { rejectWithValue }) => {
+    try {
+      const { candidateName, date } = state;
+      const res = await getCandidateSessionsData(candidateName, date);
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 
 // Actions
 export const {

@@ -9,11 +9,15 @@ export async function GET(request: NextRequest) {
     const candidateName = request.nextUrl.searchParams.get("candidateName");
     const date = request.nextUrl.searchParams.get("date");
     const sheets = await CandidateSessions.find({ candidateName, date });
-    return NextResponse.json(sheets);
+    if (sheets.length === 0) {
+      return NextResponse.json({ data: sheets[0] }, { status: 404 });
+    } else {
+      return NextResponse.json({ data: sheets[0] }, { status: 200 });
+    }
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { error: "Failed to fetch sheets" },
+      { error: "Failed to fetch candidate sessions" },
       { status: 500 }
     );
   }
@@ -23,16 +27,16 @@ export async function POST(request: NextRequest) {
   await connectToMongoDB();
   try {
     const data = await request.json();
-    console.log(data);
-    const newSheet = new CandidateSessions(data);
-    await newSheet.save();
-    return NextResponse.json({ message: "Sheet created successfully" });
-  } catch (error: any) {
-    console.log(error.errors);
+    const newCandidateSession = new CandidateSessions(data);
+    await newCandidateSession.save();
     return NextResponse.json(
-      { error: "Failed to create sheet" },
-      { status: 500 }
+      {
+        data: newCandidateSession,
+      },
+      { status: 201 }
     );
+  } catch (error: any) {
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
 
@@ -51,13 +55,18 @@ export async function PUT(request: NextRequest) {
       }
     );
     if (!updatedSheet) {
-      return NextResponse.json({ error: "Sheet not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "candidate session not found" },
+        { status: 404 }
+      );
     }
-    return NextResponse.json({ message: "Sheet updated successfully" });
+    return NextResponse.json({
+      message: "candidate session updated successfully",
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update sheet" },
+      { error: "Failed to update candidate session" },
       { status: 500 }
     );
   }
@@ -69,13 +78,18 @@ export async function DELETE(request: NextRequest) {
     const id = request.nextUrl.searchParams.get("id");
     const deletedSheet = await SheetData.findByIdAndDelete(id);
     if (!deletedSheet) {
-      return NextResponse.json({ error: "Sheet not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "candidate session not found" },
+        { status: 404 }
+      );
     }
-    return NextResponse.json({ message: "Sheet deleted successfully" });
+    return NextResponse.json({
+      message: "candidate session deleted successfully",
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to delete sheet" },
+      { error: "Failed to delete candidate session" },
       { status: 500 }
     );
   }
