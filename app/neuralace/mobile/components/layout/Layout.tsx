@@ -1,21 +1,17 @@
-import { useSessionContext } from "../../context/SessionContext";
 import StartScreen from "../StartScreen";
 import MainRecording from "../Main";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
+import { useAppSelector } from "../../store/hooks";
 
 const SessionLayout = () => {
-  const {
-    data: {
-      sessionsData: { isNewDay },
-    },
-  } = useSessionContext();
+  const { isSessionInProgress } = useAppSelector((state) => state.session);
   return (
     <div className="relative h-screen flex flex-col">
       <Header />
       <main className="w-full px-4">
         <div className="my-28">
-          {isNewDay ? <StartScreen /> : <MainRecording />}
+          {!isSessionInProgress ? <StartScreen /> : <MainRecording />}
         </div>
       </main>
       <Footer />

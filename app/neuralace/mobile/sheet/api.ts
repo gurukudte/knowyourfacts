@@ -1,5 +1,6 @@
 import axios from "axios";
 import { CandidateData } from "../hooks/useCandidateHook";
+import { SessionsData, SessionDataDocument } from "@/models/CandidateSessions";
 
 export const getAllSheetData = async () => {
   try {
