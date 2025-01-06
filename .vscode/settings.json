@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
         "neuralace"
-    ]
+    ],
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorStyle": "line-thin"
 }

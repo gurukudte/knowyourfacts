@@ -1,21 +1,13 @@
-import {
-  ISessionData,
-  SessionData,
-  useSession,
-  VideoData,
-} from "./useSessionHook";
 import { formatTime } from "./useTimeHook";
 import { useLocalStorage } from "@/hooks/localStorage";
 import { useState } from "react";
 import useCandidate from "./useCandidateHook";
+import { SessionData, VideoData } from "../types/sessionTypes";
 
 /**
  * Custom hook for handling WhatsApp sharing and Google Sheets integration.
  */
 const useActions = () => {
-  const {
-    handlers: { handleSessionDataChange },
-  } = useSession();
   const {
     states: { allCandidateData },
   } = useCandidate();
@@ -36,12 +28,10 @@ const useActions = () => {
       video.notes || "NO NOTES", // Video notes
     ]);
 
-  const shareToWhatsApp = () => {
-    const sessions = getFromLocalStorage("sessions") as SessionData[];
-    const { currentSession } = getFromLocalStorage(
-      "sessionData"
-    ) as ISessionData;
-    const currentSessionData = sessions[currentSession];
+  const shareToWhatsApp = (
+    currentSessionData: SessionData,
+    currentSession: number
+  ) => {
     const message =
       `Session : ${currentSession + 1}\n` +
       `Session ID : ${currentSessionData.sessionId}\n` +
@@ -95,10 +85,12 @@ const useActions = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
-  const updateGoogleSheet = async (candidate: string) => {
-    const currentSession = getFromLocalStorage("sessionData").currentSession;
-    const sessions = getFromLocalStorage("sessions");
-
+  const updateGoogleSheet = async (
+    candidate: string,
+    currentSession: number,
+    sessions: SessionData[],
+    update: () => void
+  ) => {
     if (sessions) {
       const sessionsData = sessions as SessionData[];
       const sheetData = sessionsData.map(formatSessionData).flat();
@@ -158,6 +150,7 @@ const useActions = () => {
         if (!response.ok)
           throw new Error(data.error || "Failed to update sheet");
         console.log("Success:", data.message);
+        update();
       } catch (error) {
         console.error("Error:", error);
       } finally {

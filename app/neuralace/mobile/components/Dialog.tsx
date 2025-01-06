@@ -10,19 +10,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useSessionContext } from "../context/SessionContext";
 import { SiGooglesheets } from "react-icons/si";
 import { TbBrandWhatsappFilled } from "react-icons/tb";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import {
+  toggleSessionInProgress,
+  updateSessionUpdateInGoogleSheet,
+} from "../store/slices/sessionSlice";
+import useActions from "../hooks/useActionsHook";
 
 export function CustomDialog() {
-  const {
-    data: {
-      selectedCandidate,
-      loading,
-      sessionsData: { currentSession, sessions },
-    },
-    handlers: { shareToWhatsApp, updateGoogleSheet, handleSessionData },
-  } = useSessionContext();
+  const { candidateName, currentSession, sessions } = useAppSelector(
+    (state) => state.session
+  );
+  const dispatch = useAppDispatch();
+  const { loading, shareToWhatsApp, updateGoogleSheet } = useActions();
+
+  const updateToSheet = () => {
+    updateGoogleSheet(candidateName, currentSession, sessions, () =>
+      dispatch(
+        updateSessionUpdateInGoogleSheet({
+          sessionIndex: currentSession,
+          lastUpdated: new Date().toLocaleString(),
+        })
+      )
+    );
+  };
 
   return (
     <Dialog>
@@ -40,20 +53,27 @@ export function CustomDialog() {
             <Button
               className="w-full"
               size="lg"
-              onClick={() => handleSessionData("isSessionInProcess", false)}
+              onClick={() => dispatch(toggleSessionInProgress(false))}
             >
               Mark Complete
             </Button>
           )}
-          <Button className="w-full" size="lg" onClick={shareToWhatsApp}>
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() =>
+              shareToWhatsApp(sessions[currentSession], currentSession)
+            }
+          >
             Share to WhatsApp
             <TbBrandWhatsappFilled />
           </Button>
-          {selectedCandidate !== "" && (
+          {candidateName !== "" && (
             <Button
               className="w-full"
               size="lg"
-              onClick={() => updateGoogleSheet(selectedCandidate)}
+              onClick={() => updateToSheet()}
+              disabled={loading}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -62,8 +82,14 @@ export function CustomDialog() {
                 </span>
               ) : (
                 <>
-                  Update to Google Sheets
-                  <SiGooglesheets />
+                  {sessions[currentSession].sheetUpdate.isUpdated ? (
+                    <>Updated</>
+                  ) : (
+                    <>
+                      Update to Google Sheets
+                      <SiGooglesheets />
+                    </>
+                  )}
                 </>
               )}
             </Button>
