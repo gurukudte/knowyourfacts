@@ -17,6 +17,7 @@ export interface SessionData {
 }
 
 export interface CandidateSessionsData {
+  id: string;
   candidateName: string;
   currentSession: number;
   sessions: SessionData[];

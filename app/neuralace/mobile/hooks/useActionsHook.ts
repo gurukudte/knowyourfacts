@@ -35,7 +35,7 @@ const useActions = () => {
     const message =
       `Session : ${currentSession + 1}\n` +
       `Session ID : ${currentSessionData.sessionId}\n` +
-      `impedence : H-${currentSessionData.highImpedance}K/L-${currentSessionData.lowImpedance}K\n` +
+      `Impedence : H-${currentSessionData.highImpedance}K/L-${currentSessionData.lowImpedance}K\n` +
       `TIMINGS:\n\n` +
       `${currentSessionData.videos
         .map(

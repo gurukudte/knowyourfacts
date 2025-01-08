@@ -2,10 +2,21 @@ import StartScreen from "../StartScreen";
 import MainRecording from "../Main";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useEffect } from "react";
+import { retrieveFromDatabase } from "../../store/slices/sessionSlice";
 
 const SessionLayout = () => {
-  const { isSessionInProgress } = useAppSelector((state) => state.session);
+  const { isSessionInProgress, ...other } = useAppSelector(
+    (state) => state.session
+  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (isSessionInProgress) {
+      dispatch(retrieveFromDatabase({ isSessionInProgress, ...other }));
+    }
+  }, []);
   return (
     <div className="relative h-screen flex flex-col">
       <Header />
