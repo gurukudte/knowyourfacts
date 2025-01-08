@@ -33,23 +33,9 @@ export const getCandidateSessionsData = async (
       method: "get",
       url: `/api/candidate-sessions?candidateName=${candidateName}&date=${date}`,
     });
-    return res.data;
+
+    return res.data.data[0];
   } catch (error) {
     return error;
   }
 };
-
-// export const getCandidateSessionsData = async (
-//   candidateName: string,
-//   date: string
-// ) => {
-//   try {
-//     const res = await axios({
-//       method: "get",
-//       url: `/api/candidate-sessions?candidateName=${candidateName}&date=${date}`,
-//     });
-//     return res.data;
-//   } catch (error) {
-//     return error;
-//   }
-// };

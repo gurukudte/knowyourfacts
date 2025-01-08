@@ -8,11 +8,16 @@ export async function GET(request: NextRequest) {
   try {
     const candidateName = request.nextUrl.searchParams.get("candidateName");
     const date = request.nextUrl.searchParams.get("date");
-    const sheets = await CandidateSessions.find({ candidateName, date });
+
+    let query: any = {};
+    if (candidateName) query.candidateName = candidateName;
+    if (date) query.date = date;
+
+    const sheets = await CandidateSessions.find(query);
     if (sheets.length === 0) {
-      return NextResponse.json({ data: sheets[0] }, { status: 404 });
+      return NextResponse.json({ data: sheets }, { status: 404 });
     } else {
-      return NextResponse.json({ data: sheets[0] }, { status: 200 });
+      return NextResponse.json({ data: sheets }, { status: 200 });
     }
   } catch (error) {
     console.log(error);

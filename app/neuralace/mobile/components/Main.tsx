@@ -68,7 +68,9 @@ export default function MainRecording() {
   };
 
   useEffect(() => {
-    dispatch(updateDatabase({ currentSession, sessions, ...other }));
+    if (sessions[0].sessionId !== "") {
+      dispatch(updateDatabase({ currentSession, sessions, ...other }));
+    }
   }, [sessions]);
   return (
     <Card className="border-none shadow-none">

@@ -138,17 +138,19 @@ const sessionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(updateDatabase.fulfilled, (state, action) => {
+      if (action?.payload?._id) {
+        const { _id, updatedAt } = action.payload;
+        state.lastUpdated = updatedAt;
+        state.isCreated = true;
+        state.id = _id;
+      }
+    });
+    builder.addCase(retrieveFromDatabase.fulfilled, (state, action) => {
+      console.log(action.payload);
       const { _id, updatedAt } = action.payload;
       state.lastUpdated = updatedAt;
       state.isCreated = true;
       state.id = _id;
-    });
-    builder.addCase(retrieveFromDatabase.fulfilled, (state, action) => {
-      state.lastUpdated = action?.payload?.updatedAt
-        ? action?.payload?.updatedAt
-        : null;
-      state.isCreated = action?.payload?._id ? true : false;
-      state.id = action?.payload?._id ? action?.payload?._id : "";
     });
   },
 });
@@ -195,7 +197,7 @@ export const retrieveFromDatabase = createAsyncThunk(
     try {
       const { candidateName, date } = state;
       const res = await getCandidateSessionsData(candidateName, date);
-      return res.data;
+      return res;
     } catch (error) {
       return rejectWithValue(error);
     }

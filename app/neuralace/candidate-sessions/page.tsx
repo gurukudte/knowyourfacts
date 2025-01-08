@@ -1,191 +1,84 @@
-import React from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { getAllCandidateSessionsData } from "./api";
+import { CandidateSessions } from "./components/main";
+import { CandidateSessionsData } from "../mobile/types/sessionTypes";
+import Link from "next/link";
+import { CandidateDates } from "./components/CandidateDates";
 
-// Typescript Interfaces
-interface VideoData {
-  startTime: string;
-  endTime: string;
-  lastUpdated: string | null;
-  notes: string;
+interface PageProps {
+  searchParams: Promise<{ candidate: string }>;
 }
 
-interface SessionData {
-  sessionId: string;
-  highImpedance: string;
-  lowImpedance: string;
-  videos: VideoData[];
-  sheetUpdate: {
-    lastUpdated: null | string;
-    isUpdated: boolean;
-  };
-}
+// Server Component
+const SessionsDisplay = async (PageProps: PageProps) => {
+  let candidatesSessions: CandidateSessionsData[] = [];
+  let candidateNames: string[] = [];
+  let filteredSessions: CandidateSessionsData[] = [];
+  let candidateName = "";
 
-interface CandidateSessionsProps {
-  candidateName: string;
-  date: string;
-  sessions: SessionData[];
-}
+  try {
+    candidatesSessions = await getAllCandidateSessionsData();
+    candidateNames = [
+      ...new Set(candidatesSessions.map((cs) => cs.candidateName)),
+    ];
 
-// Mock data (replace with API response or props)
-const mockData: CandidateSessionsProps[] = [
-  {
-    candidateName: "John Doe",
-    date: "30-12-2024",
-    sessions: [
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-      {
-        sessionId: "S1",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: false },
-      },
-      {
-        sessionId: "S2",
-        highImpedance: "High",
-        lowImpedance: "Low",
-        videos: [],
-        sheetUpdate: { lastUpdated: null, isUpdated: true },
-      },
-    ],
-  },
-];
+    const searchParams = await PageProps.searchParams;
+    // Filter sessions if candidate is selected
+    if (searchParams?.candidate) {
+      const { candidate } = searchParams;
+      filteredSessions = candidatesSessions.filter(
+        (session) => session.candidateName === candidate
+      );
+      candidateName = candidate;
+    } else {
+      filteredSessions = candidatesSessions;
+    }
+  } catch (error) {
+    console.error("Error fetching candidate sessions:", error);
+  }
 
-// React Component
-const SessionsDisplay: React.FC = () => {
   return (
-    <div className="p-6 space-y-8">
-      {mockData.map((candidate) => (
-        <div key={candidate.candidateName} className="space-y-6">
-          {/* Candidate Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {candidate.date}
-            </h2>
-          </div>
-
-          {/* Session Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {candidate.sessions.map((session) => (
-              <Card
-                key={session.sessionId}
-                className="shadow-md hover:shadow-lg transition-shadow"
+    <div className="flex h-screen bg-secondary text-primary-foreground">
+      {/* Sidebar */}
+      <div className="w-64 bg-secondary-foreground border-r border-primary-foreground">
+        <div className="p-4">
+          <Link href={`?`} className="w-full">
+            <h2 className="text-lg font-semibold mb-4">Candidate's</h2>
+          </Link>
+          <nav className="space-y-2">
+            {candidateNames.map((candidate) => (
+              <Link
+                key={candidate}
+                href={`?candidate=${candidate}`}
+                className="w-full"
               >
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-700">
-                    Session ID: {session.sessionId}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    High Impedance: {session.highImpedance}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Low Impedance: {session.lowImpedance}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Last Updated: {session.sheetUpdate.lastUpdated || "N/A"}
-                  </p>
-                </CardContent>
-                <CardFooter className="text-right">
-                  <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
-                    View Details
-                  </button>
-                </CardFooter>
-              </Card>
+                <Button
+                  variant={"ghost"}
+                  size={"lg"}
+                  className="w-full font-bold justify-start"
+                >
+                  {candidate.toLocaleUpperCase()}
+                </Button>
+              </Link>
             ))}
-          </div>
+          </nav>
         </div>
-      ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 bg-secondary-foreground">
+        {/* Top Navigation Bar */}
+        <nav className="h-14 border-b px-4 flex items-center bg-secondary-foreground">
+          <h1 className="text-xl font-semibold ">{`${
+            candidateName === "" ? "Candidate" : candidateName
+          }'s Sessions Data`}</h1>
+        </nav>
+        {candidateName === "" ? (
+          <CandidateSessions candidateSessions={filteredSessions} />
+        ) : (
+          <CandidateDates candidatesSessions={filteredSessions} />
+        )}
+      </div>
     </div>
   );
 };

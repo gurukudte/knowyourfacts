@@ -3,33 +3,16 @@ import { Button } from "@/components/ui/button";
 import { calculateDaysUntil } from "../../utils/googlesheets";
 import { CustomDialog } from "../Dialog";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import {
-  retrieveFromDatabase,
-  toggleSessionInProgress,
-} from "../../store/slices/sessionSlice";
+import { toggleSessionInProgress } from "../../store/slices/sessionSlice";
 
 export function Footer() {
-  const {
-    date,
-    candidateName,
-    isSessionInProgress,
-    currentSession,
-    sessions,
-    ...other
-  } = useAppSelector((state) => state.session);
+  const { date, candidateName, isSessionInProgress } = useAppSelector(
+    (state) => state.session
+  );
   const dispatch = useAppDispatch();
+
   const startSessions = () => {
     dispatch(toggleSessionInProgress(true));
-    dispatch(
-      retrieveFromDatabase({
-        date,
-        candidateName,
-        isSessionInProgress,
-        currentSession,
-        sessions,
-        ...other,
-      })
-    );
   };
 
   return (
