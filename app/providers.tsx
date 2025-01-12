@@ -1,10 +1,12 @@
 "use client";
-import { SessionContextProvider } from "./neuralace/mobile/context/SessionContext";
+
+import { Provider } from "react-redux";
+import store from "./neuralace/mobile/store";
 
 export interface IProvidersProps {
   children: React.ReactNode;
 }
 
 export function Providers({ children }: IProvidersProps) {
-  return <SessionContextProvider>{children}</SessionContextProvider>;
+  return <Provider store={store}>{children}</Provider>;
 }

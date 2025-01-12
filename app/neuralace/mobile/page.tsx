@@ -1,6 +1,8 @@
 "use client";
 
 import SessionLayout from "./components/layout/Layout";
+import { Provider } from "react-redux";
+import store from "./store";
 
 /**
  * Tool Recording Component
@@ -13,9 +15,5 @@ import SessionLayout from "./components/layout/Layout";
  * - Updating data to Google Sheets
  */
 export default function ToolRecording() {
-  return (
-    <>
-      <SessionLayout />
-    </>
-  );
+  return <SessionLayout />;
 }

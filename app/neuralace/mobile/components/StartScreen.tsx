@@ -9,21 +9,18 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import React from "react";
-import { useSessionContext } from "../context/SessionContext";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setCandidateName, setDate } from "../store/slices/sessionSlice";
+import useActions from "../hooks/useActionsHook";
+import useCandidate from "../hooks/useCandidateHook";
 
 const StartScreen = () => {
   const {
-    data: {
-      sessionsData: { sessionDate },
-      selectedCandidate,
-      allCandidateData,
-    },
-    handlers: { handleSessionData },
-  } = useSessionContext();
+    states: { allCandidateData },
+  } = useCandidate();
 
-  const handleSessionCandidateChange = (value: string) => {
-    handleSessionData("sessionCandidate", value);
-  };
+  const { date, candidateName } = useAppSelector((state) => state.session);
+  const dispatch = useAppDispatch();
 
   return (
     <Card className="w-full p-6 shadow-lg rounded-lg bg-white">
@@ -34,8 +31,8 @@ const StartScreen = () => {
             Select Candidate
           </Label>
           <Select
-            value={selectedCandidate}
-            onValueChange={(value) => handleSessionCandidateChange(value)}
+            value={candidateName}
+            onValueChange={(value) => dispatch(setCandidateName(value))}
           >
             <SelectTrigger id="select-candidate" className="w-full">
               <SelectValue placeholder="CANDIDATE" />
@@ -60,9 +57,9 @@ const StartScreen = () => {
             id="select-date"
             type="date"
             className="w-full"
-            value={sessionDate}
+            value={date}
             onChange={(e) => {
-              handleSessionData("sessionDate", e.target.value);
+              dispatch(setDate(e.target.value));
             }}
           />
         </div>

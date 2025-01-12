@@ -1,13 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { VideoData } from "@/app/neuralace/mobile/hooks/useSessionHook";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useSessionContext } from "./mobile/context/SessionContext";
 import { TbBrandWhatsappFilled } from "react-icons/tb";
+import { useAppSelector } from "./mobile/store/hooks";
+import useActionsHook from "./mobile/hooks/useActionsHook";
+import { useDispatch } from "react-redux";
+import {
+  clearSessionTimings,
+  setCurrentSession,
+  setVideoTimeChange,
+  updateSession,
+} from "./mobile/store/slices/sessionSlice";
+import { VideoData } from "./mobile/types/sessionTypes";
 
 /**
  * Tool Recording Component
@@ -20,19 +28,9 @@ import { TbBrandWhatsappFilled } from "react-icons/tb";
  * - Updating data to Google Sheets
  */
 export default function MainRecording() {
-  const {
-    data: {
-      sessionsData: { sessions, currentSession },
-    },
-    handlers: {
-      handleSessionDataChange,
-      recordCurrentTime,
-      handleVideoTimeChange,
-      shareAllToWhatsApp,
-      navigateSession,
-      clearSessionTimings,
-    },
-  } = useSessionContext();
+  const { sessions, currentSession } = useAppSelector((state) => state.session);
+  const { shareAllToWhatsApp } = useActionsHook();
+  const dispatch = useDispatch();
 
   /**
    * Checks if a video has any timing data entered
@@ -43,6 +41,31 @@ export default function MainRecording() {
     video: Pick<VideoData, "startTime" | "endTime">
   ): boolean => {
     return video.startTime !== "" || video.endTime !== "";
+  };
+
+  const handleVideoTimeChange = (
+    value: string,
+    videoIndex: number,
+    field: "startTime" | "endTime" | "notes"
+  ) => {
+    dispatch(
+      setVideoTimeChange({
+        sessionIndex: currentSession,
+        videoIndex: videoIndex,
+        field: field,
+        value: value,
+      })
+    );
+  };
+
+  const recordCurrentTime = (
+    videoIndex: number,
+    field: "startTime" | "endTime"
+  ) => {
+    const value = new Date().toLocaleTimeString("en-GB", {
+      hour12: false,
+    });
+    handleVideoTimeChange(value, videoIndex, field);
   };
 
   return (
@@ -57,7 +80,7 @@ export default function MainRecording() {
           <div className="flex items-center justify-between gap-2">
             <Button
               size="sm"
-              onClick={() => navigateSession("prev")}
+              onClick={() => dispatch(setCurrentSession("prev"))}
               disabled={currentSession === 0}
             >
               Previous
@@ -65,13 +88,13 @@ export default function MainRecording() {
             <Button
               size="sm"
               variant="destructive"
-              onClick={clearSessionTimings}
+              onClick={() => dispatch(clearSessionTimings(currentSession))}
             >
               Clear Session
             </Button>
             <Button
               size="sm"
-              onClick={() => navigateSession("next")}
+              onClick={() => dispatch(setCurrentSession("next"))}
               disabled={currentSession === sessions.length - 1}
             >
               "Next"
@@ -92,12 +115,14 @@ export default function MainRecording() {
                     </Label>
                     <Input
                       id={`session-${currentSession}-id`}
-                      value={sessions[currentSession].sessionId}
+                      value={sessions[currentSession]?.sessionId}
                       onChange={(e) =>
-                        handleSessionDataChange(
-                          currentSession,
-                          "sessionId",
-                          e.target.value
+                        dispatch(
+                          updateSession({
+                            sessionIndex: currentSession,
+                            field: "sessionId",
+                            value: e.target.value,
+                          })
                         )
                       }
                       placeholder="Enter Session ID"
@@ -114,10 +139,12 @@ export default function MainRecording() {
                       placeholder="Enter High Impedance"
                       type="number"
                       onChange={(e) =>
-                        handleSessionDataChange(
-                          currentSession,
-                          "highImpedance",
-                          e.target.value
+                        dispatch(
+                          updateSession({
+                            sessionIndex: currentSession,
+                            field: "highImpedance",
+                            value: e.target.value,
+                          })
                         )
                       }
                     />
@@ -133,20 +160,21 @@ export default function MainRecording() {
                       placeholder="Enter Low Impedance"
                       type="number"
                       onChange={(e) =>
-                        handleSessionDataChange(
-                          currentSession,
-                          "lowImpedance",
-                          e.target.value
+                        dispatch(
+                          updateSession({
+                            sessionIndex: currentSession,
+                            field: "lowImpedance",
+                            value: e.target.value,
+                          })
                         )
                       }
                     />
                   </div>
                 </div>
-
                 {/* Video timing cards section */}
                 <div className="mt-6">
                   <h3 className="text-base font-semibold mb-4">
-                    Video Timings
+                    Block Timings
                   </h3>
                   <div className="space-y-4">
                     {sessions[currentSession].videos.map(
@@ -159,7 +187,7 @@ export default function MainRecording() {
                         >
                           <CardHeader className="p-4">
                             <CardTitle className="text-base flex justify-between items-center">
-                              <span>Video {videoIndex + 1}</span>
+                              <span>{`block_${videoIndex}`}</span>
                               {video.lastUpdated && (
                                 <span className="text-xs text-muted-foreground">
                                   Last updated: {video.lastUpdated}
@@ -183,10 +211,9 @@ export default function MainRecording() {
                                   value={video.startTime}
                                   onChange={(e) =>
                                     handleVideoTimeChange(
-                                      currentSession,
+                                      e.target.value,
                                       videoIndex,
-                                      "startTime",
-                                      e.target.value
+                                      "startTime"
                                     )
                                   }
                                   className="flex-1"
@@ -216,10 +243,9 @@ export default function MainRecording() {
                                   value={video.endTime}
                                   onChange={(e) =>
                                     handleVideoTimeChange(
-                                      currentSession,
+                                      e.target.value,
                                       videoIndex,
-                                      "endTime",
-                                      e.target.value
+                                      "endTime"
                                     )
                                   }
                                   className="flex-1"
@@ -246,10 +272,9 @@ export default function MainRecording() {
                                 value={video.notes}
                                 onChange={(e) =>
                                   handleVideoTimeChange(
-                                    currentSession,
+                                    e.target.value,
                                     videoIndex,
-                                    "notes",
-                                    e.target.value
+                                    "notes"
                                   )
                                 }
                                 placeholder="Add notes for this video..."

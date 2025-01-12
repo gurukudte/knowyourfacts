@@ -1,15 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  useSession,
-  VideoData,
-} from "@/app/neuralace/mobile/hooks/useSessionHook";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useSessionContext } from "../context/SessionContext";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import {
+  setVideoTimeChange,
+  updateDatabase,
+  updateSession,
+} from "../store/slices/sessionSlice";
+import { VideoData } from "../types/sessionTypes";
+import { useEffect } from "react";
 
 /**
  * Tool Recording Component
@@ -22,16 +25,11 @@ import { useSessionContext } from "../context/SessionContext";
  * - Updating data to Google Sheets
  */
 export default function MainRecording() {
-  const {
-    data: {
-      sessionsData: { sessions, currentSession },
-    },
-    handlers: {
-      handleSessionDataChange,
-      recordCurrentTime,
-      handleVideoTimeChange,
-    },
-  } = useSessionContext();
+  const { currentSession, sessions, ...other } = useAppSelector(
+    (state) => state.session
+  );
+  const store = useAppSelector((state) => state.session);
+  const dispatch = useAppDispatch();
 
   /**
    * Checks if a video has any timing data entered
@@ -44,6 +42,36 @@ export default function MainRecording() {
     return video.startTime !== "" || video.endTime !== "";
   };
 
+  const handleVideoTimeChange = (
+    value: string,
+    videoIndex: number,
+    field: "startTime" | "endTime" | "notes"
+  ) => {
+    dispatch(
+      setVideoTimeChange({
+        sessionIndex: currentSession,
+        videoIndex: videoIndex,
+        field: field,
+        value: value,
+      })
+    );
+  };
+
+  const recordCurrentTime = (
+    videoIndex: number,
+    field: "startTime" | "endTime"
+  ) => {
+    const value = new Date().toLocaleTimeString("en-GB", {
+      hour12: false,
+    });
+    handleVideoTimeChange(value, videoIndex, field);
+  };
+
+  useEffect(() => {
+    if (sessions[0].sessionId !== "") {
+      dispatch(updateDatabase({ currentSession, sessions, ...other }));
+    }
+  }, [sessions]);
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">
@@ -54,12 +82,14 @@ export default function MainRecording() {
               <Label htmlFor={`session-${currentSession}-id`}>Session ID</Label>
               <Input
                 id={`session-${currentSession}-id`}
-                value={sessions[currentSession].sessionId}
+                value={sessions[currentSession]?.sessionId}
                 onChange={(e) =>
-                  handleSessionDataChange(
-                    currentSession,
-                    "sessionId",
-                    e.target.value
+                  dispatch(
+                    updateSession({
+                      sessionIndex: currentSession,
+                      field: "sessionId",
+                      value: e.target.value,
+                    })
                   )
                 }
                 placeholder="Enter Session ID"
@@ -76,10 +106,12 @@ export default function MainRecording() {
                 placeholder="Enter High Impedance"
                 type="number"
                 onChange={(e) =>
-                  handleSessionDataChange(
-                    currentSession,
-                    "highImpedance",
-                    e.target.value
+                  dispatch(
+                    updateSession({
+                      sessionIndex: currentSession,
+                      field: "highImpedance",
+                      value: e.target.value,
+                    })
                   )
                 }
               />
@@ -95,19 +127,20 @@ export default function MainRecording() {
                 placeholder="Enter Low Impedance"
                 type="number"
                 onChange={(e) =>
-                  handleSessionDataChange(
-                    currentSession,
-                    "lowImpedance",
-                    e.target.value
+                  dispatch(
+                    updateSession({
+                      sessionIndex: currentSession,
+                      field: "lowImpedance",
+                      value: e.target.value,
+                    })
                   )
                 }
               />
             </div>
           </div>
-
           {/* Video timing cards section */}
           <div className="mt-6">
-            <h3 className="text-base font-semibold mb-4">Video Timings</h3>
+            <h3 className="text-base font-semibold mb-4">Block Timings</h3>
             <div className="space-y-4">
               {sessions[currentSession].videos.map((video, videoIndex) => (
                 <Card
@@ -116,7 +149,7 @@ export default function MainRecording() {
                 >
                   <CardHeader className="p-4">
                     <CardTitle className="text-base flex justify-between items-center">
-                      <span>Video {videoIndex + 1}</span>
+                      <span>{`block_${videoIndex}`}</span>
                       {video.lastUpdated && (
                         <span className="text-xs text-muted-foreground">
                           Last updated: {video.lastUpdated}
@@ -140,10 +173,9 @@ export default function MainRecording() {
                           value={video.startTime}
                           onChange={(e) =>
                             handleVideoTimeChange(
-                              currentSession,
+                              e.target.value,
                               videoIndex,
-                              "startTime",
-                              e.target.value
+                              "startTime"
                             )
                           }
                           className="flex-1"
@@ -173,10 +205,9 @@ export default function MainRecording() {
                           value={video.endTime}
                           onChange={(e) =>
                             handleVideoTimeChange(
-                              currentSession,
+                              e.target.value,
                               videoIndex,
-                              "endTime",
-                              e.target.value
+                              "endTime"
                             )
                           }
                           className="flex-1"
@@ -203,10 +234,9 @@ export default function MainRecording() {
                         value={video.notes}
                         onChange={(e) =>
                           handleVideoTimeChange(
-                            currentSession,
+                            e.target.value,
                             videoIndex,
-                            "notes",
-                            e.target.value
+                            "notes"
                           )
                         }
                         placeholder="Add notes for this video..."
