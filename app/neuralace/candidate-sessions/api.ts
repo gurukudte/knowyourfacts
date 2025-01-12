@@ -4,7 +4,7 @@ export const getAllCandidateSessionsData = async () => {
   try {
     const res = await axios({
       method: "get",
-      url: `http://localhost:3000/api/candidate-sessions`,
+      url: `${process.env.NEXT_BASE_URI}/api/candidate-sessions`,
     });
     return res.data.data;
   } catch (error) {
