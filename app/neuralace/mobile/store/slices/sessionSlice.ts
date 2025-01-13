@@ -114,7 +114,10 @@ const sessionSlice = createSlice({
             createEmptySession
           )),
           (state.currentSession = 0),
-          (state.isSessionInProgress = true))
+          (state.isSessionInProgress = true),
+          ((state.id = ""),
+          (state.isCreated = false),
+          (state.lastUpdated = "")))
         : (state.isSessionInProgress = action.payload);
     },
     updateSessionUpdateInGoogleSheet(
@@ -146,11 +149,12 @@ const sessionSlice = createSlice({
       }
     });
     builder.addCase(retrieveFromDatabase.fulfilled, (state, action) => {
-      console.log(action.payload);
-      const { _id, updatedAt } = action.payload;
-      state.lastUpdated = updatedAt;
-      state.isCreated = true;
-      state.id = _id;
+      if (action?.payload?._id) {
+        const { _id, updatedAt } = action.payload;
+        state.lastUpdated = updatedAt;
+        state.isCreated = true;
+        state.id = _id;
+      }
     });
   },
 });
