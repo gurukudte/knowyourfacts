@@ -16,7 +16,7 @@ const SessionLayout = () => {
     if (isSessionInProgress) {
       dispatch(retrieveFromDatabase({ isSessionInProgress, ...other }));
     }
-  }, []);
+  }, [isSessionInProgress]);
   return (
     <div className="relative h-screen flex flex-col">
       <Header />
