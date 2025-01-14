@@ -52,10 +52,8 @@ const useActions = () => {
 
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
-  const shareAllToWhatsApp = () => {
-    const sessions = getFromLocalStorage("sessions") as SessionData[];
-
-    const message = sessions
+  const shareAllToWhatsApp = (sessionsData: SessionData[]) => {
+    const message = sessionsData
       .map((currentSessionData, currentSession) => {
         return (
           `Session : ${currentSession + 1}\n` +
