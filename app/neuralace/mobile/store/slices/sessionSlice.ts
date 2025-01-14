@@ -57,7 +57,7 @@ const sessionSlice = createSlice({
     setCandidateName(state, action: PayloadAction<string>) {
       state.candidateName = action.payload;
     },
-    setCurrentSession(state, action: PayloadAction<"prev" | "next">) {
+    setCurrentSession(state, action: PayloadAction<"prev" | "next" | number>) {
       switch (action.payload) {
         case "prev":
           state.currentSession -= 1;
@@ -138,7 +138,12 @@ const sessionSlice = createSlice({
       updatedSessions[action.payload] = createEmptySession();
       state.sessions = updatedSessions;
     },
+    startNew(state) {
+      state.currentSession = 0;
+      state.isSessionInProgress = true;
+    },
   },
+
   extraReducers: (builder) => {
     builder.addCase(updateDatabase.fulfilled, (state, action) => {
       if (action?.payload?._id) {
@@ -221,6 +226,7 @@ export const {
   toggleSessionInProgress,
   updateSessionUpdateInGoogleSheet,
   clearSessionTimings,
+  startNew,
 } = sessionSlice.actions;
 
 // Reducer

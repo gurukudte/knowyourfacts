@@ -10,9 +10,9 @@ import { useAppSelector } from "./mobile/store/hooks";
 import useActionsHook from "./mobile/hooks/useActionsHook";
 import { useDispatch } from "react-redux";
 import {
-  clearSessionTimings,
   setCurrentSession,
   setVideoTimeChange,
+  startNew,
   updateSession,
 } from "./mobile/store/slices/sessionSlice";
 import { VideoData } from "./mobile/types/sessionTypes";
@@ -57,6 +57,10 @@ export default function MainRecording() {
       })
     );
   };
+  const clearSessions = () => {
+    localStorage.clear();
+    dispatch(startNew());
+  };
 
   const recordCurrentTime = (
     videoIndex: number,
@@ -85,13 +89,11 @@ export default function MainRecording() {
             >
               Previous
             </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => dispatch(clearSessionTimings(currentSession))}
-            >
-              Clear Session
-            </Button>
+            {currentSession === sessions.length - 1 && (
+              <Button size="sm" variant="destructive" onClick={clearSessions}>
+                Clear Sessions
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={() => dispatch(setCurrentSession("next"))}
@@ -295,7 +297,11 @@ export default function MainRecording() {
       {currentSession === sessions.length - 1 && (
         <footer className="w-full fixed bottom-0 p-4 bg-secondary">
           <div className="flex flex-col gap-2">
-            <Button className="w-full" size="lg" onClick={shareAllToWhatsApp}>
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => shareAllToWhatsApp(sessions)}
+            >
               Share to WhatsApp
               <TbBrandWhatsappFilled />
             </Button>
