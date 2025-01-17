@@ -13,7 +13,10 @@ import {
 } from "../store/slices/sessionSlice";
 import { VideoData } from "../types/sessionTypes";
 import { useEffect } from "react";
+import { io } from "socket.io-client";
 
+// Connect to WebSocket server
+const socket = io(process.env.LIVE_PUBLIC_URI);
 /**
  * Tool Recording Component
  * Main page component for recording and managing video timing sessions.
@@ -72,6 +75,22 @@ export default function MainRecording() {
       dispatch(updateDatabase({ currentSession, sessions, ...other }));
     }
   }, [sessions]);
+
+  useEffect(() => {
+    // Function to send updates
+    const sendLiveUpdate = async () => {
+      try {
+        socket.emit("candidateUpdate", {
+          candidateId: store.candidateName, // Use unique candidate ID
+          sessionData: sessions,
+        });
+      } catch (error) {}
+    };
+
+    // Send updates every 5 seconds
+    const interval = setInterval(sendLiveUpdate, 5000);
+    return () => clearInterval(interval);
+  }, [currentSession, sessions]);
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">

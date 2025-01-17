@@ -15,7 +15,7 @@ export interface IAppProps {
 
 export function CandidateSessions({ candidateSessions }: IAppProps) {
   return (
-    <main className="h-[calc(100vh-3.5rem)] overflow-y-scroll">
+    <main className="h-[calc(100vh-3.5rem)]">
       <div className="p-6 space-y-8 ">
         {candidateSessions?.length === 0 ? (
           <p className="text-center text-gray-600">

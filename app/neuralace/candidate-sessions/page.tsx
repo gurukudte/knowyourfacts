@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { getAllCandidateSessionsData } from "./api";
-import { CandidateSessions } from "./components/main";
+import { CandidateSessions } from "./components/AllCandidates";
 import { CandidateSessionsData } from "../mobile/types/sessionTypes";
 import Link from "next/link";
 import { CandidateDates } from "./components/CandidateDates";
+import { initialState } from "../mobile/store/slices/sessionSlice";
+import { Suspense } from "react";
+import { SessionList } from "./components/SessionsCard";
 
 interface PageProps {
-  searchParams: Promise<{ candidate: string }>;
+  searchParams: Promise<{ candidate: string; date: string }>;
 }
 
 // Server Component
@@ -14,7 +17,9 @@ const SessionsDisplay = async (PageProps: PageProps) => {
   let candidatesSessions: CandidateSessionsData[] = [];
   let candidateNames: string[] = [];
   let filteredSessions: CandidateSessionsData[] = [];
+  let filteredSession: CandidateSessionsData = initialState;
   let candidateName = "";
+  let candidateDate = "";
 
   try {
     candidatesSessions = await getAllCandidateSessionsData();
@@ -25,11 +30,16 @@ const SessionsDisplay = async (PageProps: PageProps) => {
     const searchParams = await PageProps.searchParams;
     // Filter sessions if candidate is selected
     if (searchParams?.candidate) {
-      const { candidate } = searchParams;
+      const { candidate, date } = searchParams;
       filteredSessions = candidatesSessions.filter(
         (session) => session.candidateName === candidate
       );
+      filteredSession = candidatesSessions.filter(
+        (session) =>
+          session.candidateName === candidate && session.date === date
+      )[0];
       candidateName = candidate;
+      candidateDate = date;
     } else {
       filteredSessions = candidatesSessions;
     }
@@ -45,8 +55,8 @@ const SessionsDisplay = async (PageProps: PageProps) => {
           <Link href={`?`} className="w-full">
             <h2 className="text-lg font-semibold mb-4">Candidate's</h2>
           </Link>
-          <nav className="space-y-2">
-            {candidateNames.map((candidate) => (
+          <nav className="flex flex-col gap-2">
+            {candidateNames?.map((candidate) => (
               <Link
                 key={candidate}
                 href={`?candidate=${candidate}`}
@@ -55,9 +65,13 @@ const SessionsDisplay = async (PageProps: PageProps) => {
                 <Button
                   variant={"ghost"}
                   size={"lg"}
-                  className="w-full font-bold justify-start"
+                  className={`w-full font-bold justify-start ${
+                    candidate === candidateName
+                      ? "bg-accent text-accent-foreground"
+                      : ""
+                  }`}
                 >
-                  {candidate.toLocaleUpperCase()}
+                  {candidate}
                 </Button>
               </Link>
             ))}
@@ -73,11 +87,23 @@ const SessionsDisplay = async (PageProps: PageProps) => {
             candidateName === "" ? "Candidate" : candidateName
           }'s Sessions Data`}</h1>
         </nav>
-        {candidateName === "" ? (
-          <CandidateSessions candidateSessions={filteredSessions} />
-        ) : (
-          <CandidateDates candidatesSessions={filteredSessions} />
-        )}
+        <div className="px-4 py-8">
+          <div className="overflow-auto max-h-[86vh] custom-scrollbar">
+            {typeof candidateDate === "undefined" ? (
+              <>
+                {candidateName === "" ? (
+                  <CandidateSessions candidateSessions={filteredSessions} />
+                ) : (
+                  <CandidateDates candidatesSessions={filteredSessions} />
+                )}
+              </>
+            ) : (
+              // <Suspense fallback={<div>Loading...</div>}>
+              // </Suspense>
+              <SessionList candidate={filteredSession} />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
