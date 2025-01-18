@@ -3,12 +3,12 @@ import {
   CandidateSessionsData,
   SessionData,
   VideoData,
-} from "../../types/sessionTypes";
+} from "../types/sessionTypes";
 import {
   createCandidateSessionsData,
   getCandidateSessionsData,
   updateCandidateSessionsData,
-} from "../../api";
+} from "../api";
 
 // Configuration constants
 export const DEFAULT_TIME = "00:00:00";
@@ -137,7 +137,7 @@ const sessionSlice = createSlice({
       state.sessions = updatedSessions;
     },
     startNew(state) {
-      state.currentSession = 0;
+      state = initialState;
       state.isSessionInProgress = true;
     },
   },

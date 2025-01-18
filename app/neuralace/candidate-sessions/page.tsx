@@ -1,52 +1,22 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { getAllCandidateSessionsData } from "./api";
-import { CandidateSessions } from "./components/AllCandidates";
-import { CandidateSessionsData } from "../mobile/types/sessionTypes";
 import Link from "next/link";
-import { CandidateDates } from "./components/CandidateDates";
-import { initialState } from "../mobile/store/slices/sessionSlice";
-import { Suspense } from "react";
 import { SessionList } from "./components/SessionsCard";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useEffect } from "react";
+import { fetchCandidateSessions } from "./slices/DashboardCandidateSessionsSlice";
+import { PacmanLoader } from "react-spinners";
 
-interface PageProps {
-  searchParams: Promise<{ candidate: string; date: string }>;
-}
+const SessionsDisplay = () => {
+  const { candidateNames, candidateName } = useAppSelector(
+    (state) => state.DashboardCandidateSessions
+  );
+  const dispatch = useAppDispatch();
 
-// Server Component
-const SessionsDisplay = async (PageProps: PageProps) => {
-  let candidatesSessions: CandidateSessionsData[] = [];
-  let candidateNames: string[] = [];
-  let filteredSessions: CandidateSessionsData[] = [];
-  let filteredSession: CandidateSessionsData = initialState;
-  let candidateName = "";
-  let candidateDate = "";
-
-  try {
-    candidatesSessions = await getAllCandidateSessionsData();
-    candidateNames = [
-      ...new Set(candidatesSessions.map((cs) => cs.candidateName)),
-    ];
-
-    const searchParams = await PageProps.searchParams;
-    // Filter sessions if candidate is selected
-    if (searchParams?.candidate) {
-      const { candidate, date } = searchParams;
-      filteredSessions = candidatesSessions.filter(
-        (session) => session.candidateName === candidate
-      );
-      filteredSession = candidatesSessions.filter(
-        (session) =>
-          session.candidateName === candidate && session.date === date
-      )[0];
-      candidateName = candidate;
-      candidateDate = date;
-    } else {
-      filteredSessions = candidatesSessions;
-    }
-  } catch (error) {
-    console.error("Error fetching candidate sessions:", error);
-  }
-
+  useEffect(() => {
+    dispatch(fetchCandidateSessions());
+  }, []);
   return (
     <div className="flex h-screen bg-secondary text-primary-foreground">
       {/* Sidebar */}
@@ -57,23 +27,18 @@ const SessionsDisplay = async (PageProps: PageProps) => {
           </Link>
           <nav className="flex flex-col gap-2">
             {candidateNames?.map((candidate) => (
-              <Link
+              <Button
                 key={candidate}
-                href={`?candidate=${candidate}`}
-                className="w-full"
+                variant={"ghost"}
+                size={"lg"}
+                className={`w-full font-bold justify-start ${
+                  candidate === candidateName
+                    ? "bg-accent text-accent-foreground"
+                    : ""
+                }`}
               >
-                <Button
-                  variant={"ghost"}
-                  size={"lg"}
-                  className={`w-full font-bold justify-start ${
-                    candidate === candidateName
-                      ? "bg-accent text-accent-foreground"
-                      : ""
-                  }`}
-                >
-                  {candidate}
-                </Button>
-              </Link>
+                {candidate}
+              </Button>
             ))}
           </nav>
         </div>
@@ -87,22 +52,27 @@ const SessionsDisplay = async (PageProps: PageProps) => {
             candidateName === "" ? "Candidate" : candidateName
           }'s Sessions Data`}</h1>
         </nav>
-        <div className="px-4 py-8">
-          <div className="overflow-auto max-h-[86vh] custom-scrollbar">
-            {typeof candidateDate === "undefined" ? (
-              <>
-                {candidateName === "" ? (
-                  <CandidateSessions candidateSessions={filteredSessions} />
-                ) : (
-                  <CandidateDates candidatesSessions={filteredSessions} />
-                )}
-              </>
-            ) : (
-              // <Suspense fallback={<div>Loading...</div>}>
-              // </Suspense>
-              <SessionList candidate={filteredSession} />
-            )}
+        {candidateNames.length > 0 ? (
+          <SessionList />
+        ) : (
+          <div className="h-[70vh] w-full flex justify-center items-center">
+            <PacmanLoader size={35} color="white" />
           </div>
+        )}
+        <div className="p-2">
+          {/* <div>
+
+          {typeof candidateDate === "undefined" ? (
+            <>
+              {candidateName === "" ? (
+                <CandidateSessions />
+              ) : (
+                <CandidateDates />
+              )} 
+            </>
+          ) : (
+          )}
+          </div> */}
         </div>
       </div>
     </div>

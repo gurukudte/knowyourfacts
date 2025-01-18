@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const socket = io(process.env.LIVE_PUBLIC_URI);
+const socket = io(process.env.NEXT_PUBLIC_LIVE_BASE_URI);
 
 export default function AdminDashboard() {
   const [candidates, setCandidates] = useState<any>([]);

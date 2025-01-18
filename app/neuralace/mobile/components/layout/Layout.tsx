@@ -2,9 +2,9 @@ import StartScreen from "../StartScreen";
 import MainRecording from "../Main";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
 import { useEffect } from "react";
-import { retrieveFromDatabase } from "../../store/slices/sessionSlice";
+import { retrieveFromDatabase } from "../../slices/sessionSlice";
 
 const SessionLayout = () => {
   const { isSessionInProgress, ...other } = useAppSelector(

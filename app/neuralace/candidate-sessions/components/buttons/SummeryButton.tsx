@@ -6,28 +6,21 @@ import {
   SessionData,
 } from "../../../mobile/types/sessionTypes";
 import { formatTime } from "../../../mobile/hooks/useTimeHook";
+import { useAppSelector } from "@/store/hooks";
 
-export interface IExcelButtonProps {
-  candidateSessions: CandidateSessionsData;
-}
-
-export function SummeryButton({ candidateSessions }: IExcelButtonProps) {
-  const [isCopied, setIsCopied] = React.useState(false);
-  const notes = candidateSessions.sessions.map(
-    (session) =>
-      `${session.videos
-        .filter((sessionVideo) => sessionVideo.notes !== "")
-        .map((video, videoIndex) =>
-          (video.notes + " in block_" + videoIndex).toString()
-        )}`
+export function SummeryButton() {
+  const { filteredSession, candidateDate, candidateName } = useAppSelector(
+    (state) => state.DashboardCandidateSessions
   );
-  console.log(notes);
+
+  const [isCopied, setIsCopied] = React.useState(false);
+
   const generateSessionData = () => {
     let sessionData = "";
-    sessionData += `${candidateSessions.date}\t`;
+    sessionData += `${candidateDate}\t`;
     sessionData += `Shift A\t`;
-    sessionData += `${candidateSessions.candidateName}\t`;
-    candidateSessions.sessions.forEach((session, index) => {
+    sessionData += `${candidateName}\t`;
+    filteredSession?.forEach((session, index) => {
       sessionData += `${index === 0 ? "" : "\t\t\t"}`;
       sessionData += `${index + 1}\t${formatTime(
         session.videos[0].startTime || "00:00:00"

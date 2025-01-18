@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -6,23 +7,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import * as React from "react";
-import { CandidateSessionsData } from "../../mobile/types/sessionTypes";
 import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/store/hooks";
 
-export interface IAppProps {
-  candidateSessions: CandidateSessionsData[];
-}
+export interface IAppProps {}
 
-export function CandidateSessions({ candidateSessions }: IAppProps) {
+export function CandidateSessions() {
+  const { filteredSessions } = useAppSelector(
+    (state) => state.DashboardCandidateSessions
+  );
   return (
     <main className="h-[calc(100vh-3.5rem)]">
       <div className="p-6 space-y-8 ">
-        {candidateSessions?.length === 0 ? (
+        {filteredSessions?.length === 0 ? (
           <p className="text-center text-gray-600">
             No candidate sessions found.
           </p>
         ) : (
-          candidateSessions?.map((candidate, index) => (
+          filteredSessions?.map((candidate, index) => (
             <div key={candidate?.candidateName + index} className="space-y-6">
               {/* Candidate Header */}
               <div className="flex items-center justify-between">

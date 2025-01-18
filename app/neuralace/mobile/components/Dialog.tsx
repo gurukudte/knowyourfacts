@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { SiGooglesheets } from "react-icons/si";
 import { TbBrandWhatsappFilled } from "react-icons/tb";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import {
   toggleSessionInProgress,
   updateSessionUpdateInGoogleSheet,
-} from "../store/slices/sessionSlice";
+} from "../slices/sessionSlice";
 import useActions from "../hooks/useActionsHook";
 
 export function CustomDialog() {
