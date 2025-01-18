@@ -1,42 +1,22 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { getAllCandidateSessionsData } from "./api";
-import { CandidateSessions } from "./components/main";
-import { CandidateSessionsData } from "../mobile/types/sessionTypes";
 import Link from "next/link";
-import { CandidateDates } from "./components/CandidateDates";
+import { SessionList } from "./components/SessionsCard";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useEffect } from "react";
+import { fetchCandidateSessions } from "./slices/DashboardCandidateSessionsSlice";
+import { PacmanLoader } from "react-spinners";
 
-interface PageProps {
-  searchParams: Promise<{ candidate: string }>;
-}
+const SessionsDisplay = () => {
+  const { candidateNames, candidateName } = useAppSelector(
+    (state) => state.DashboardCandidateSessions
+  );
+  const dispatch = useAppDispatch();
 
-// Server Component
-const SessionsDisplay = async (PageProps: PageProps) => {
-  let candidatesSessions: CandidateSessionsData[] = [];
-  let candidateNames: string[] = [];
-  let filteredSessions: CandidateSessionsData[] = [];
-  let candidateName = "";
-
-  try {
-    candidatesSessions = await getAllCandidateSessionsData();
-    candidateNames = [
-      ...new Set(candidatesSessions.map((cs) => cs.candidateName)),
-    ];
-
-    const searchParams = await PageProps.searchParams;
-    // Filter sessions if candidate is selected
-    if (searchParams?.candidate) {
-      const { candidate } = searchParams;
-      filteredSessions = candidatesSessions.filter(
-        (session) => session.candidateName === candidate
-      );
-      candidateName = candidate;
-    } else {
-      filteredSessions = candidatesSessions;
-    }
-  } catch (error) {
-    console.error("Error fetching candidate sessions:", error);
-  }
-
+  useEffect(() => {
+    dispatch(fetchCandidateSessions());
+  }, []);
   return (
     <div className="flex h-screen bg-secondary text-primary-foreground">
       {/* Sidebar */}
@@ -45,21 +25,20 @@ const SessionsDisplay = async (PageProps: PageProps) => {
           <Link href={`?`} className="w-full">
             <h2 className="text-lg font-semibold mb-4">Candidate's</h2>
           </Link>
-          <nav className="space-y-2">
-            {candidateNames.map((candidate) => (
-              <Link
+          <nav className="flex flex-col gap-2">
+            {candidateNames?.map((candidate) => (
+              <Button
                 key={candidate}
-                href={`?candidate=${candidate}`}
-                className="w-full"
+                variant={"ghost"}
+                size={"lg"}
+                className={`w-full font-bold justify-start ${
+                  candidate === candidateName
+                    ? "bg-accent text-accent-foreground"
+                    : ""
+                }`}
               >
-                <Button
-                  variant={"ghost"}
-                  size={"lg"}
-                  className="w-full font-bold justify-start"
-                >
-                  {candidate.toLocaleUpperCase()}
-                </Button>
-              </Link>
+                {candidate}
+              </Button>
             ))}
           </nav>
         </div>
@@ -73,11 +52,28 @@ const SessionsDisplay = async (PageProps: PageProps) => {
             candidateName === "" ? "Candidate" : candidateName
           }'s Sessions Data`}</h1>
         </nav>
-        {candidateName === "" ? (
-          <CandidateSessions candidateSessions={filteredSessions} />
+        {candidateNames.length > 0 ? (
+          <SessionList />
         ) : (
-          <CandidateDates candidatesSessions={filteredSessions} />
+          <div className="h-[70vh] w-full flex justify-center items-center">
+            <PacmanLoader size={35} color="white" />
+          </div>
         )}
+        <div className="p-2">
+          {/* <div>
+
+          {typeof candidateDate === "undefined" ? (
+            <>
+              {candidateName === "" ? (
+                <CandidateSessions />
+              ) : (
+                <CandidateDates />
+              )} 
+            </>
+          ) : (
+          )}
+          </div> */}
+        </div>
       </div>
     </div>
   );

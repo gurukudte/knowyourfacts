@@ -4,7 +4,7 @@ import { SessionData } from "@/app/neuralace/mobile/types/sessionTypes";
 const calculateTimeDiffInSeconds = (startTime: string, endTime: string) => {
   const start = startTime.split(":").map(Number);
   const end = endTime.split(":").map(Number);
-
+  console.log(startTime, endTime);
   // Convert to seconds
   const startInSeconds = start[0] * 3600 + start[1] * 60 + start[2];
   const endInSeconds = end[0] * 3600 + end[1] * 60 + end[2];
@@ -21,7 +21,6 @@ export const calculateTotalTimeDiff = (sessions: any[]) => {
     session?.videos?.forEach((video) => {
       // Only calculate time difference if startTime and endTime are not "00:00:00"
       if (video.startTime !== "00:00:00" && video.endTime !== "00:00:00") {
-        console.log(calculateTimeDiffInSeconds(video.startTime, video.endTime));
         totalTimeInSeconds += calculateTimeDiffInSeconds(
           video.startTime,
           video.endTime
@@ -29,11 +28,14 @@ export const calculateTotalTimeDiff = (sessions: any[]) => {
       }
     });
   });
-
   // Convert the total time from seconds to HH:mm:ss format
-  const hours = Math.floor(totalTimeInSeconds / 3600);
-  const minutes = Math.floor((totalTimeInSeconds % 3600) / 60);
-  const seconds = totalTimeInSeconds % 60;
+  const hours = Math.floor(totalTimeInSeconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const minutes = Math.floor((totalTimeInSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (totalTimeInSeconds % 60).toString().padStart(2, "0");
 
   return `${hours}:${minutes}:${seconds}`;
 };

@@ -5,15 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   setVideoTimeChange,
   updateDatabase,
   updateSession,
-} from "../store/slices/sessionSlice";
+} from "../slices/sessionSlice";
 import { VideoData } from "../types/sessionTypes";
 import { useEffect } from "react";
+import { io } from "socket.io-client";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
+// Connect to WebSocket server
+const socket = io(process.env.NEXT_PUBLIC_LIVE_BASE_URI);
 /**
  * Tool Recording Component
  * Main page component for recording and managing video timing sessions.
@@ -72,6 +75,22 @@ export default function MainRecording() {
       dispatch(updateDatabase({ currentSession, sessions, ...other }));
     }
   }, [sessions]);
+
+  useEffect(() => {
+    // Function to send updates
+    const sendLiveUpdate = async () => {
+      try {
+        socket.emit("candidateUpdate", {
+          candidateId: store.candidateName, // Use unique candidate ID
+          sessionData: sessions,
+        });
+      } catch (error) {}
+    };
+
+    // Send updates every 5 seconds
+    const interval = setInterval(sendLiveUpdate, 5000);
+    return () => clearInterval(interval);
+  }, [currentSession, sessions]);
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">

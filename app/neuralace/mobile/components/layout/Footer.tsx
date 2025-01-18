@@ -2,8 +2,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { calculateDaysUntil } from "../../utils/googlesheets";
 import { CustomDialog } from "../Dialog";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { toggleSessionInProgress } from "../../store/slices/sessionSlice";
+import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
+import { toggleSessionInProgress } from "../../slices/sessionSlice";
 
 export function Footer() {
   const { date, candidateName, isSessionInProgress } = useAppSelector(

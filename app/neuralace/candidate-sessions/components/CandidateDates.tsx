@@ -9,13 +9,14 @@ import * as React from "react";
 import { CandidateSessionsData } from "../../mobile/types/sessionTypes";
 import { Button } from "@/components/ui/button";
 import { calculateTotalTimeDiff } from "./utils/calculateSessionTime";
+import Link from "next/link";
+import { convertToIST } from "./utils/formatTime";
 
 export interface IAppProps {
   candidatesSessions: CandidateSessionsData[];
 }
 
-export function CandidateDates({ candidatesSessions }: IAppProps) {
-  const totalSessionTime = calculateTotalTimeDiff(candidatesSessions);
+export async function CandidateDates({ candidatesSessions }: IAppProps) {
   return (
     <main className="h-[calc(100vh-3.5rem)] overflow-y-scroll">
       <div className="p-6 space-y-8 ">
@@ -26,12 +27,9 @@ export function CandidateDates({ candidatesSessions }: IAppProps) {
         ) : (
           <div className="flex flex-row gap-6">
             {candidatesSessions?.map((candidate, index) => (
-              <Card
-                key={candidate.date + index}
-                className="bg-secondary-foreground shadow-md hover:shadow-lg transition-shadow text-primary-foreground"
-              >
+              <Card className="bg-gray-900 border-gray-800 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold">
+                  <CardTitle className="text-white">
                     {new Date(candidate.date).toLocaleDateString("en-GB", {
                       day: "2-digit",
                       month: "short",
@@ -40,30 +38,41 @@ export function CandidateDates({ candidatesSessions }: IAppProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-md ">
-                    {`Total Recorded Time : ${totalSessionTime}`}
-                  </p>
-                  <p className="text-md ">
-                    Last Updated:{" "}
-                    {candidate.lastUpdated
-                      ? new Date(candidate.lastUpdated).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: true,
-                            timeZone: "Asia/Kolkata",
-                          }
-                        )
-                      : "N/A"}
-                  </p>
+                  <div className="text-gray-400 space-y-2">
+                    <p>
+                      <strong>Total Sessions:</strong>{" "}
+                      {candidate.sessions.length}
+                    </p>
+                    <p>
+                      <strong>Last Updated:</strong>{" "}
+                      {candidate.updatedAt
+                        ? convertToIST(candidate.updatedAt)
+                        : "Not available"}
+                    </p>
+                    <p>
+                      <strong>Total Recording:</strong>{" "}
+                      {calculateTotalTimeDiff(candidate.sessions)}
+                    </p>
+                    <p
+                      className={
+                        candidate.isSessionInProgress
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    >
+                      {candidate.isSessionInProgress
+                        ? "Session in Progress"
+                        : "No Active Session"}
+                    </p>
+                  </div>
                 </CardContent>
                 <CardFooter className="text-right">
-                  <Button variant={"secondary"}>View Details</Button>
+                  <Link
+                    href={`?candidate=${candidate.candidateName}&date=${candidate.date}`}
+                    className="w-full"
+                  >
+                    <Button variant={"secondary"}>View Details</Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}
