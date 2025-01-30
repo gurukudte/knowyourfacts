@@ -32,6 +32,12 @@ const DashboardCandidateSessionsSlice = createSlice({
   name: "DashboardCandidateSessions",
   initialState,
   reducers: {
+    setCandidateName(state, action: PayloadAction<string>) {
+      state.candidateName = action.payload;
+    },
+    setCandidateDate(state, action: PayloadAction<string>) {
+      state.candidateDate = action.payload;
+    },
     setCandidateFromSearchParams: (
       state,
       action: PayloadAction<{ candidate?: string; date?: string }>
@@ -53,7 +59,6 @@ const DashboardCandidateSessionsSlice = createSlice({
       )[0]?.sessions;
       state.filteredSession = fil;
       state.filteredSessions = filtered;
-      console.log({ ...state });
     },
     changeCandidateName: (state, action: PayloadAction<string>) => {},
   },
@@ -78,6 +83,10 @@ const DashboardCandidateSessionsSlice = createSlice({
   },
 });
 
-export const { setCandidateFromSearchParams, changeCandidateName } =
-  DashboardCandidateSessionsSlice.actions;
+export const {
+  setCandidateName,
+  setCandidateDate,
+  setCandidateFromSearchParams,
+  changeCandidateName,
+} = DashboardCandidateSessionsSlice.actions;
 export default DashboardCandidateSessionsSlice.reducer;

@@ -7,16 +7,19 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
 import { fetchCandidateSessions } from "./slices/DashboardCandidateSessionsSlice";
 import { PacmanLoader } from "react-spinners";
+import { useSyncCandidate } from "./hooks/useSyncCandidate";
 
 const SessionsDisplay = () => {
   const { candidateNames, candidateName } = useAppSelector(
     (state) => state.DashboardCandidateSessions
   );
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(fetchCandidateSessions());
   }, []);
+
+  useSyncCandidate();
   return (
     <div className="flex h-screen bg-secondary text-primary-foreground">
       {/* Sidebar */}
@@ -55,7 +58,7 @@ const SessionsDisplay = () => {
         {candidateNames.length > 0 ? (
           <SessionList />
         ) : (
-          <div className="h-[70vh] w-full flex justify-center items-center">
+          <div className={`w-full h-[82vh] flex justify-center items-center`}>
             <PacmanLoader size={35} color="white" />
           </div>
         )}
