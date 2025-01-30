@@ -6,7 +6,6 @@ export const getAllCandidateSessionsData = async () => {
       method: "get",
       url: `/api/candidate-sessions`,
     });
-    console.log(res.data.data);
     return res.data.data;
   } catch (error) {
     return error;

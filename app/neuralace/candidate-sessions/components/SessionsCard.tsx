@@ -27,6 +27,7 @@ export function SessionList() {
     useAppSelector((state) => state.DashboardCandidateSessions);
   const dispatch = useAppDispatch();
 
+  console.log(filteredSession);
   return (
     <div className="p-4">
       <div className="flex justify-between">
@@ -45,7 +46,7 @@ export function SessionList() {
                 <SelectValue placeholder="CANDIDATE" />
               </SelectTrigger>
               <SelectContent>
-                {candidateNames.map((candidate) => (
+                {candidateNames?.map((candidate) => (
                   <SelectItem key={candidate} value={candidate}>
                     {candidate}
                   </SelectItem>
@@ -72,7 +73,7 @@ export function SessionList() {
           <SummeryButton />
         </div>
       </div>
-      <div className="min-w-full max-h-[80vh] overflow-auto custom-scrollbar mt-8 flex gap-4 flex-col justify-center items-center">
+      <div className="max-h-[80vh] overflow-auto custom-scrollbar mt-8 flex gap-4 flex-col ">
         {filteredSession?.length > 0 ? (
           filteredSession?.map((session, index) => (
             <Card
