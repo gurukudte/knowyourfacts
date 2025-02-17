@@ -98,7 +98,7 @@ export default function MainRecording() {
               onClick={() => dispatch(setCurrentSession("next"))}
               disabled={currentSession === sessions.length - 1}
             >
-              "Next"
+              Next
             </Button>
           </div>
         </div>
