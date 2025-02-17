@@ -137,6 +137,10 @@ const sessionSlice = createSlice({
       state.sessions = updatedSessions;
     },
     startNew(state) {
+      state.sessions = Array.from(
+        { length: TOTAL_SESSIONS },
+        createEmptySession
+      );
       state = initialState;
       state.isSessionInProgress = true;
     },
