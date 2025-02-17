@@ -22,7 +22,7 @@ export interface CandidateSessionsData {
   currentSession: number;
   sessions: SessionData[];
   isCreated: boolean;
-  lastUpdated: string | null;
+  updatedAt: string | null;
   date: string;
   isSessionInProgress: boolean;
 }

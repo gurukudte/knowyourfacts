@@ -8,9 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import React from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setCandidateName, setDate } from "../store/slices/sessionSlice";
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { setCandidateName, setDate } from "../slices/sessionSlice";
 import useActions from "../hooks/useActionsHook";
 import useCandidate from "../hooks/useCandidateHook";
 
@@ -22,6 +22,9 @@ const StartScreen = () => {
   const { date, candidateName } = useAppSelector((state) => state.session);
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
   return (
     <Card className="w-full p-6 shadow-lg rounded-lg bg-white">
       <div className="flex flex-col gap-6">

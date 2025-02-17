@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TbBrandWhatsappFilled } from "react-icons/tb";
-import { useAppSelector } from "./mobile/store/hooks";
+import { useAppSelector } from "../../store/hooks";
 import useActionsHook from "./mobile/hooks/useActionsHook";
 import { useDispatch } from "react-redux";
 import {
@@ -14,7 +14,7 @@ import {
   setVideoTimeChange,
   startNew,
   updateSession,
-} from "./mobile/store/slices/sessionSlice";
+} from "./mobile/slices/sessionSlice";
 import { VideoData } from "./mobile/types/sessionTypes";
 
 /**
@@ -58,7 +58,6 @@ export default function MainRecording() {
     );
   };
   const clearSessions = () => {
-    localStorage.clear();
     dispatch(startNew());
   };
 
@@ -99,7 +98,7 @@ export default function MainRecording() {
               onClick={() => dispatch(setCurrentSession("next"))}
               disabled={currentSession === sessions.length - 1}
             >
-              "Next"
+              Next
             </Button>
           </div>
         </div>

@@ -2,21 +2,21 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Home Page Component
- * 
+ *
  * This is the main landing page component for the Know Your Facts platform.
  * It provides an overview of the platform's key features and calls-to-action
  * for users to explore content or contribute.
- * 
+ *
  * Component Structure:
  * - Hero Section: Main headline, description, and primary CTAs
  * - Features Section: Three key features displayed in a grid
  * - CTA Section: Final call-to-action for user registration
- * 
+ *
  * Key Features Highlighted:
  * 1. Technical Articles
  * 2. Development Tools
  * 3. Community Engagement
- * 
+ *
  * Navigation Links:
  * - /explore: Takes users to content exploration page
  * - /share: Takes users to resource sharing page
@@ -37,7 +37,7 @@ export default function Home() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button asChild size="lg" className="text-lg">
-              <a href="/explore">Explore Content</a>
+              <a href="/login">Explore Content</a>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg">
               <a href="/share">Share Resource</a>
@@ -131,7 +131,7 @@ export default function Home() {
           </p>
           <div className="mt-8">
             <Button asChild size="lg" className="text-lg">
-              <a href="/register">Get Started</a>
+              <a href="/signup">Get Started</a>
             </Button>
           </div>
         </div>

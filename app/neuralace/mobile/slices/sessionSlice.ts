@@ -3,12 +3,12 @@ import {
   CandidateSessionsData,
   SessionData,
   VideoData,
-} from "../../types/sessionTypes";
+} from "../types/sessionTypes";
 import {
   createCandidateSessionsData,
   getCandidateSessionsData,
   updateCandidateSessionsData,
-} from "../../api";
+} from "../api";
 
 // Configuration constants
 export const DEFAULT_TIME = "00:00:00";
@@ -35,13 +35,13 @@ const createEmptySession = (): SessionData => ({
 });
 
 // Initial State
-const initialState: CandidateSessionsData = {
+export const initialState: CandidateSessionsData = {
   id: "",
   candidateName: "",
   currentSession: 0,
   sessions: Array.from({ length: TOTAL_SESSIONS }, createEmptySession),
   isCreated: false,
-  lastUpdated: null,
+  updatedAt: null,
   date: "",
   isSessionInProgress: false,
 };
@@ -102,7 +102,7 @@ const sessionSlice = createSlice({
       state.sessions = updatedSessions;
     },
     updateLastUpdated(state, action: PayloadAction<string | null>) {
-      state.lastUpdated = action.payload;
+      state.updatedAt = action.payload;
     },
     setDate(state, action: PayloadAction<string>) {
       state.date = action.payload;
@@ -115,9 +115,7 @@ const sessionSlice = createSlice({
           )),
           (state.currentSession = 0),
           (state.isSessionInProgress = true),
-          ((state.id = ""),
-          (state.isCreated = false),
-          (state.lastUpdated = "")))
+          ((state.id = ""), (state.isCreated = false), (state.updatedAt = "")))
         : (state.isSessionInProgress = action.payload);
     },
     updateSessionUpdateInGoogleSheet(
@@ -139,7 +137,11 @@ const sessionSlice = createSlice({
       state.sessions = updatedSessions;
     },
     startNew(state) {
-      state.currentSession = 0;
+      state.sessions = Array.from(
+        { length: TOTAL_SESSIONS },
+        createEmptySession
+      );
+      state = initialState;
       state.isSessionInProgress = true;
     },
   },
@@ -148,7 +150,7 @@ const sessionSlice = createSlice({
     builder.addCase(updateDatabase.fulfilled, (state, action) => {
       if (action?.payload?._id) {
         const { _id, updatedAt } = action.payload;
-        state.lastUpdated = updatedAt;
+        state.updatedAt = updatedAt;
         state.isCreated = true;
         state.id = _id;
       }
@@ -156,7 +158,7 @@ const sessionSlice = createSlice({
     builder.addCase(retrieveFromDatabase.fulfilled, (state, action) => {
       if (action?.payload?._id) {
         const { _id, updatedAt } = action.payload;
-        state.lastUpdated = updatedAt;
+        state.updatedAt = updatedAt;
         state.isCreated = true;
         state.id = _id;
       }
@@ -171,7 +173,7 @@ export const updateDatabase = createAsyncThunk(
       const {
         sessions,
         isCreated,
-        lastUpdated,
+        updatedAt,
         id,
         currentSession,
         isSessionInProgress,

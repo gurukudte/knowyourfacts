@@ -1,11 +1,8 @@
 import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "../../store/hooks";
-import {
-  setCurrentSession,
-  TOTAL_SESSIONS,
-} from "../../store/slices/sessionSlice";
+import { useAppSelector } from "../../../../../store/hooks";
+import { setCurrentSession, TOTAL_SESSIONS } from "../../slices/sessionSlice";
 import { useDispatch } from "react-redux";
 
 export function Header() {

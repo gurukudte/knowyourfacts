@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import sessionReducer from "./slices/sessionSlice";
+import sessionReducer from "../app/neuralace/mobile/slices/sessionSlice";
+import DashboardCandidateSessionsReducer from "@/app/neuralace/candidate-sessions/slices/DashboardCandidateSessionsSlice";
 import { loadState, saveState } from "./localStorage";
 
 const PERSISTED_STATE_KEY = "candidateSessions";
@@ -10,6 +11,7 @@ const preloadedState: any = loadState(PERSISTED_STATE_KEY);
 const store = configureStore({
   reducer: {
     session: sessionReducer,
+    DashboardCandidateSessions: DashboardCandidateSessionsReducer,
   },
   preloadedState: {
     session: preloadedState, // Use preloaded state if available
