@@ -13,6 +13,7 @@ import {
   setCurrentSession,
   setVideoTimeChange,
   startNew,
+  toggleSessionInProgress,
   updateSession,
 } from "./mobile/slices/sessionSlice";
 import { VideoData } from "./mobile/types/sessionTypes";
@@ -58,7 +59,7 @@ export default function MainRecording() {
     );
   };
   const clearSessions = () => {
-    dispatch(startNew());
+    dispatch(toggleSessionInProgress(true));
   };
 
   const recordCurrentTime = (
