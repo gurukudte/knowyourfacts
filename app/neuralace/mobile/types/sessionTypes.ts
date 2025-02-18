@@ -18,6 +18,7 @@ export interface SessionData {
 
 export interface CandidateSessionsData {
   id: string;
+  "ra/technicianName"?: "";
   candidateName: string;
   currentSession: number;
   sessions: SessionData[];

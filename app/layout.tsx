@@ -17,8 +17,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased w-screen h-[100dvh]`}>
         <Providers>
+          {/* <Toaster /> */}
           {children}
-          <Toaster />
         </Providers>
       </body>
     </html>
