@@ -1,34 +1,17 @@
 "use server";
-import bcrypt from "bcryptjs";
-
-import { SignupSchema } from "@/schemas";
-import { getUserByEmail } from "@/data/user";
-import { db } from "@/lib/db";
 
 const signup = async (values: any) => {
-  const validatedFields = SignupSchema.safeParse(values);
-  if (!validatedFields.success) {
-    return { error: "Invalid fields" };
+  try {
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    return await response.json();
+  } catch (error) {
+    return { error: "Something went wrong" };
   }
-
-  const { name, email, password } = validatedFields.data;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) return { error: "Email already in use!" };
-
-  const newUser = await db.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role: "USER",
-    },
-  });
-
-  //TODO: Send verification token email
-
-  return { success: "User created", user: newUser };
 };
 
 export default signup;
