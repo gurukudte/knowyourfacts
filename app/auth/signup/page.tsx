@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import * as React from "react";
@@ -20,14 +19,7 @@ import {
 import { FormError } from "@/components/auth/form-error";
 import { FormSuccess } from "@/components/auth/form-success";
 import signup from "@/actions/signup";
-
-interface IUserDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  isAgreed: boolean;
-}
+import Socials from "../Socials";
 
 function SignUp() {
   const [isPending, startTransition] = React.useTransition();
@@ -36,7 +28,7 @@ function SignUp() {
   const form = useForm<z.infer<typeof SignupSchema>>({
     resolver: zodResolver(SignupSchema),
     defaultValues: {
-      userName: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -49,6 +41,7 @@ function SignUp() {
       signup(values).then((data) => {
         setSuccess(data.success);
         setError(data.error);
+        console.log(data.user);
       });
     });
   };
@@ -56,7 +49,7 @@ function SignUp() {
     <div className="h-full flex bg-[#2c2638]">
       <div className="w-1/2"></div>
       <div className="w-1/2 flex justify-center items-center">
-        <div className="w-full p-14 flex flex-col gap-4">
+        <div className="  p-14 flex flex-col gap-4">
           <h1 className="text-white scroll-m-20 text-4xl font-semibold tracking-tight lg:text-5xl">
             Create an account
           </h1>
@@ -69,14 +62,14 @@ function SignUp() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="userName"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <Input
                         {...field}
                         disabled={isPending}
-                        placeholder="user name"
+                        placeholder="Name"
                         className="text-white"
                       />
                     </FormControl>
@@ -138,16 +131,7 @@ function SignUp() {
               <div>
                 <Separator />
               </div>
-              <div className="flex gap-4">
-                <Button size="icon" className="w-full" disabled={isPending}>
-                  <FcGoogle />
-                  Google
-                </Button>
-                <Button size="icon" className="w-full" disabled={isPending}>
-                  <FaGithub />
-                  Github
-                </Button>
-              </div>
+              <Socials isPending={isPending} />
               <div className="flex gap-2 ju items-center">
                 <p className="text-[#746E80] font-bold leading-7 [&:not(:first-child)]:mt-6">
                   Already have an account?

@@ -38,6 +38,7 @@ const createEmptySession = (): SessionData => ({
 export const initialState: CandidateSessionsData = {
   id: "",
   candidateName: "",
+  "ra/technicianName": "",
   currentSession: 0,
   sessions: Array.from({ length: TOTAL_SESSIONS }, createEmptySession),
   isCreated: false,

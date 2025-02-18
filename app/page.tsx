@@ -37,7 +37,7 @@ export default function Home() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button asChild size="lg" className="text-lg">
-              <a href="/login">Explore Content</a>
+              <a href="/auth/login">Explore Content</a>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg">
               <a href="/share">Share Resource</a>
