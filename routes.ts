@@ -9,6 +9,12 @@ export const publicRoutes = [
   "/neuralace/mobile",
   "/privacy-policy",
   "/terms",
+  "/neuralace/mobile/sheet",
+  "/neuralace/tech-sheet",
+  "/api/sheet",
+  "/api/candidate-sessions",
+  "/api/googlesheet",
+  "/api/tech-sheet",
 ];
 
 /**

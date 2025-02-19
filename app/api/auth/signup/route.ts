@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-
 import { SignupSchema } from "@/schemas";
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";

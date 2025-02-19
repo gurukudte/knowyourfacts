@@ -11,7 +11,6 @@ import { Card } from "@/components/ui/card";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { setCandidateName, setDate } from "../slices/sessionSlice";
-import useActions from "../hooks/useActionsHook";
 import useCandidate from "../hooks/useCandidateHook";
 
 const StartScreen = () => {
@@ -25,6 +24,7 @@ const StartScreen = () => {
   useEffect(() => {
     localStorage.clear();
   }, []);
+  console.log(allCandidateData);
   return (
     <Card className="w-full p-6 shadow-lg rounded-lg bg-white">
       <div className="flex flex-col gap-6">

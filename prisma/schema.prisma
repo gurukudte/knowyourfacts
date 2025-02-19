@@ -53,3 +53,9 @@ model Account {
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
+
+model TechSheetData {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  technicianName String
+  sheetID        String
+}
