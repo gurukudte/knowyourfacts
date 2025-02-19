@@ -3,7 +3,13 @@
  *
  * @constant {string[]}
  */
-export const publicRoutes = ["/", "/neuralace", "/neuralace/mobile"];
+export const publicRoutes = [
+  "/",
+  "/neuralace",
+  "/neuralace/mobile",
+  "/privacy-policy",
+  "/terms",
+];
 
 /**
  * Routes for authentication.
