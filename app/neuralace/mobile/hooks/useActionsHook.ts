@@ -1,5 +1,4 @@
 import { formatTime } from "./useTimeHook";
-import { useLocalStorage } from "@/hooks/localStorage";
 import { useState } from "react";
 import useCandidate from "./useCandidateHook";
 import { SessionData, VideoData } from "../types/sessionTypes";
@@ -11,7 +10,6 @@ const useActions = () => {
   const {
     states: { allCandidateData },
   } = useCandidate();
-  const { getFromLocalStorage } = useLocalStorage();
   const [loading, setLoading] = useState(false);
 
   const formatSessionData = (session: SessionData, sessionIndex: number) =>
@@ -84,10 +82,13 @@ const useActions = () => {
   };
 
   const updateGoogleSheet = async (
+    isSheetUpdated: boolean,
+    todayStartRange: number,
     candidate: string,
     currentSession: number,
     sessions: SessionData[],
-    update: () => void
+    sheetId: string,
+    update: (lastRow: number) => void
   ) => {
     if (sessions) {
       const sessionsData = sessions as SessionData[];
@@ -122,6 +123,7 @@ const useActions = () => {
         { startRange: 72, endRange: 78 },
         { startRange: 79, endRange: 85 },
         { startRange: 86, endRange: 92 },
+        { startRange: 93, endRange: 99 },
       ];
 
       const modifiedData = sheetData.slice(
@@ -137,18 +139,23 @@ const useActions = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            range: `${candidate}!${
-              Number(sheetRange) + ranges[currentSession].startRange
-            }:${Number(sheetRange) + ranges[currentSession].endRange}`,
+            action: "updateTimings",
+            isSheetUpdated: isSheetUpdated,
+            todayStartRange: todayStartRange,
+            startRange: ranges[currentSession].startRange,
+            endRange: ranges[currentSession].endRange,
+            candidateName: candidate,
             values: modifiedData,
+            spreadsheetId: sheetId,
           }),
         });
 
         const data = await response.json();
         if (!response.ok)
           throw new Error(data.error || "Failed to update sheet");
-        console.log("Success:", data.message);
-        update();
+        console.log("Success:", data.response.lastRow);
+        const lastRow: number = data.response.lastRow || 0;
+        update(lastRow);
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -157,7 +164,42 @@ const useActions = () => {
     }
   };
 
-  return { loading, shareToWhatsApp, updateGoogleSheet, shareAllToWhatsApp };
+  const updateFeedBackToGoogleSheet = async (
+    values: string[][],
+    sheetId: string
+  ) => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/googlesheet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "updateFeedback",
+          range: "HI",
+          values,
+          spreadsheetId: sheetId,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to update sheet");
+      console.log("Success:", data.message);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    shareToWhatsApp,
+    updateGoogleSheet,
+    shareAllToWhatsApp,
+    updateFeedBackToGoogleSheet,
+  };
 };
 
 export default useActions;

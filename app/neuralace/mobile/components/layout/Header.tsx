@@ -33,7 +33,6 @@ export function Header() {
             </Button>
             <Button
               size="sm"
-              disabled={currentSession === TOTAL_SESSIONS - 1}
               onClick={() => dispatch(setCurrentSession("next"))}
             >
               Next

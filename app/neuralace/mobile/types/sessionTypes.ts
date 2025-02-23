@@ -18,7 +18,9 @@ export interface SessionData {
 
 export interface CandidateSessionsData {
   id: string;
-  "ra/technicianName"?: "";
+  todayStartRange: number;
+  isSheetUpdated: boolean;
+  raTechnicianName?: string;
   candidateName: string;
   currentSession: number;
   sessions: SessionData[];

@@ -2,9 +2,11 @@
 export function calculateDaysUntil(targetDateString: string): number {
   // Parse the target date
   const targetDate = new Date(targetDateString);
+  targetDate.setHours(0, 0, 0, 0);
 
   // Get the current date
   const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
 
   // Calculate the difference in milliseconds
   const differenceInMilliseconds = currentDate.getTime() - targetDate.getTime();
@@ -14,5 +16,5 @@ export function calculateDaysUntil(targetDateString: string): number {
     differenceInMilliseconds / (1000 * 60 * 60 * 24)
   );
 
-  return daysDifference - 1;
+  return daysDifference;
 }

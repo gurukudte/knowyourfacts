@@ -1,15 +1,17 @@
 import StartScreen from "../StartScreen";
-import MainRecording from "../Main";
+import MainRecording from "../MainScreen";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
 import { useEffect } from "react";
 import { retrieveFromDatabase } from "../../slices/sessionSlice";
+import EndScreen from "../EndScreen";
 
 const SessionLayout = () => {
   const { isSessionInProgress, ...other } = useAppSelector(
     (state) => state.session
   );
+  const session = other.currentSession;
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -18,15 +20,23 @@ const SessionLayout = () => {
     }
   }, [isSessionInProgress]);
   return (
-    <div className="relative h-screen flex flex-col">
-      <Header />
-      <main className="w-full px-4">
-        <div className="my-28">
-          {!isSessionInProgress ? <StartScreen /> : <MainRecording />}
-        </div>
-      </main>
-      <Footer />
-    </div>
+    <>
+      {session < 14 ? (
+        <>
+          <div className="relative h-screen flex flex-col">
+            <Header />
+            <main className="w-full px-4">
+              <div className="my-28">
+                {!isSessionInProgress ? <StartScreen /> : <MainRecording />}
+              </div>
+            </main>
+            <Footer />
+          </div>
+        </>
+      ) : (
+        <EndScreen />
+      )}
+    </>
   );
 };
 

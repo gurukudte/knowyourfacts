@@ -10,15 +10,25 @@ import {
 import { Card } from "@/components/ui/card";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { setCandidateName, setDate } from "../slices/sessionSlice";
+import {
+  setCandidateName,
+  setDate,
+  setRaTechnicianName,
+} from "../slices/sessionSlice";
 import useCandidate from "../hooks/useCandidateHook";
+import useTechnician from "../../tech-sheet/useTechnicianHook";
 
 const StartScreen = () => {
   const {
     states: { allCandidateData },
   } = useCandidate();
+  const {
+    states: { allTechnicianData },
+  } = useTechnician();
 
-  const { date, candidateName } = useAppSelector((state) => state.session);
+  const { date, candidateName, raTechnicianName } = useAppSelector(
+    (state) => state.session
+  );
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -46,6 +56,31 @@ const StartScreen = () => {
                 .map((candidate) => (
                   <SelectItem key={candidate} value={candidate}>
                     {candidate}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="select-raTTechnician"
+            className="text-lg font-semibold"
+          >
+            RA/Technician
+          </Label>
+          <Select
+            value={raTechnicianName}
+            onValueChange={(value) => dispatch(setRaTechnicianName(value))}
+          >
+            <SelectTrigger id="select-candidate" className="w-full">
+              <SelectValue placeholder="RA/Technician" />
+            </SelectTrigger>
+            <SelectContent>
+              {allTechnicianData
+                ?.map((data) => data.technicianName)
+                .map((technician) => (
+                  <SelectItem key={technician} value={technician}>
+                    {technician}
                   </SelectItem>
                 ))}
             </SelectContent>

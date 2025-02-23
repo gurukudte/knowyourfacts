@@ -37,8 +37,10 @@ const createEmptySession = (): SessionData => ({
 // Initial State
 export const initialState: CandidateSessionsData = {
   id: "",
+  isSheetUpdated: false,
+  todayStartRange: 2,
   candidateName: "",
-  "ra/technicianName": "",
+  raTechnicianName: "",
   currentSession: 0,
   sessions: Array.from({ length: TOTAL_SESSIONS }, createEmptySession),
   isCreated: false,
@@ -57,6 +59,9 @@ const sessionSlice = createSlice({
     },
     setCandidateName(state, action: PayloadAction<string>) {
       state.candidateName = action.payload;
+    },
+    setRaTechnicianName(state, action: PayloadAction<string>) {
+      state.raTechnicianName = action.payload;
     },
     setCurrentSession(state, action: PayloadAction<"prev" | "next" | number>) {
       switch (action.payload) {
@@ -145,6 +150,16 @@ const sessionSlice = createSlice({
       state = initialState;
       state.isSessionInProgress = true;
     },
+    updateSheet(
+      state,
+      action: PayloadAction<{
+        isSheetUpdated?: boolean;
+        todayStartRange?: number;
+      }>
+    ) {
+      state.isSheetUpdated = action.payload.isSheetUpdated || false;
+      state.todayStartRange = action.payload.todayStartRange || 0;
+    },
   },
 
   extraReducers: (builder) => {
@@ -230,6 +245,8 @@ export const {
   updateSessionUpdateInGoogleSheet,
   clearSessionTimings,
   startNew,
+  setRaTechnicianName,
+  updateSheet,
 } = sessionSlice.actions;
 
 // Reducer

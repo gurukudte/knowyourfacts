@@ -14,7 +14,6 @@ export function Footer() {
   const startSessions = () => {
     dispatch(toggleSessionInProgress(true));
   };
-
   return (
     <footer className="w-full fixed bottom-0 p-4 bg-secondary">
       {!isSessionInProgress ? (
