@@ -1,5 +1,3 @@
-import { Copy } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,26 +12,52 @@ import { SiGooglesheets } from "react-icons/si";
 import { TbBrandWhatsappFilled } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import {
-  toggleSessionInProgress,
   updateSessionUpdateInGoogleSheet,
+  updateSheet,
 } from "../slices/sessionSlice";
 import useActions from "../hooks/useActionsHook";
+import useTechnician from "../../tech-sheet/useTechnicianHook";
 
 export function CustomDialog() {
-  const { candidateName, currentSession, sessions } = useAppSelector(
-    (state) => state.session
-  );
+  const {
+    candidateName,
+    currentSession,
+    sessions,
+    raTechnicianName,
+    isSheetUpdated,
+    todayStartRange,
+  } = useAppSelector((state) => state.session);
+  const {
+    states: { allTechnicianData },
+  } = useTechnician();
+
+  const sheetId =
+    allTechnicianData.find((tech) => tech.technicianName === raTechnicianName)
+      ?.sheetID || "";
   const dispatch = useAppDispatch();
   const { loading, shareToWhatsApp, updateGoogleSheet } = useActions();
 
   const updateToSheet = () => {
-    updateGoogleSheet(candidateName, currentSession, sessions, () =>
-      dispatch(
-        updateSessionUpdateInGoogleSheet({
-          sessionIndex: currentSession,
-          lastUpdated: new Date().toLocaleString(),
-        })
-      )
+    updateGoogleSheet(
+      isSheetUpdated,
+      todayStartRange,
+      candidateName,
+      currentSession,
+      sessions,
+      sheetId,
+      (lastRow) => {
+        dispatch(
+          updateSessionUpdateInGoogleSheet({
+            sessionIndex: currentSession,
+            lastUpdated: new Date().toLocaleString(),
+          })
+        );
+        if (lastRow > 0) {
+          dispatch(
+            updateSheet({ todayStartRange: lastRow, isSheetUpdated: true })
+          );
+        }
+      }
     );
   };
 
@@ -49,15 +73,6 @@ export function CustomDialog() {
           <DialogTitle>Update session</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 items-center">
-          {currentSession === sessions.length - 1 && (
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => dispatch(toggleSessionInProgress(false))}
-            >
-              Mark Complete
-            </Button>
-          )}
           <Button
             className="w-full"
             size="lg"

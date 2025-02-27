@@ -37,13 +37,19 @@ export default function Home() {
               </a>
             </div>
             <nav className="flex space-x-4">
-              <a href="/explore" className="text-gray-600 hover:text-gray-900">
+              <a
+                href="/auth/login"
+                className="text-gray-600 hover:text-gray-900"
+              >
                 Explore
               </a>
               <a href="/share" className="text-gray-600 hover:text-gray-900">
                 Share
               </a>
-              <a href="/register" className="text-gray-600 hover:text-gray-900">
+              <a
+                href="/auth/signup"
+                className="text-gray-600 hover:text-gray-900"
+              >
                 Register
               </a>
               <a

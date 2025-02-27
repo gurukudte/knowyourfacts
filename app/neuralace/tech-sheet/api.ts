@@ -1,12 +1,11 @@
 import axios from "axios";
-import { CandidateData } from "../hooks/useCandidateHook";
-import { SessionsData, SessionDataDocument } from "@/models/CandidateSessions";
+import { TechSheet } from "./useTechnicianHook";
 
-export const getAllSheetData = async () => {
+export const getAllTechSheetData = async () => {
   try {
     const res = await axios({
       method: "get",
-      url: "/api/sheet",
+      url: "/api/tech-sheet",
     });
     return res.data;
   } catch (error) {
@@ -14,24 +13,22 @@ export const getAllSheetData = async () => {
   }
 };
 
-export const getSheetData = async (id: string) => {
+export const getTechSheetData = async (id: string) => {
   try {
     const res = await axios({
       method: "get",
-      url: `/api/sheet?${id}`,
+      url: `/api/tech-sheet?${id}`,
     });
     return res.data;
   } catch (error) {
     return error;
   }
 };
-export const createSheetData = async (
-  data: Pick<CandidateData, "sheetName" | "sheetRange">
-) => {
+export const createTechSheetData = async (data: Omit<TechSheet, "id">) => {
   try {
     const res = await axios({
       method: "post",
-      url: "/api/sheet",
+      url: "/api/tech-sheet",
       data: data,
     });
     return res.data;
@@ -39,15 +36,15 @@ export const createSheetData = async (
     return error;
   }
 };
-export const updateSheetData = async (data: CandidateData) => {
+export const updateTechSheetData = async (data: TechSheet) => {
   try {
-    const { _id, sheetName, sheetRange } = data;
+    const { id, technicianName, sheetID } = data;
     const res = await axios({
       method: "put",
-      url: `/api/sheet?id=${_id}`,
+      url: `/api/tech-sheet?id=${id}`,
       data: {
-        sheetName,
-        sheetRange,
+        technicianName,
+        sheetID,
       },
     });
     return res.data;
@@ -55,11 +52,11 @@ export const updateSheetData = async (data: CandidateData) => {
     return error;
   }
 };
-export const deleteSheetData = async (id: string) => {
+export const deleteTechSheetData = async (id: string) => {
   try {
     const res = await axios({
       method: "delete",
-      url: `/api/sheet?id=${id}`,
+      url: `/api/tech-sheet?id=${id}`,
     });
     return res.data;
   } catch (error) {

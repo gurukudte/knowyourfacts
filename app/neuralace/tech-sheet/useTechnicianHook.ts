@@ -1,32 +1,31 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { ISheet } from "@/models/Sheet";
 import {
-  createSheetData,
-  deleteSheetData,
-  getAllSheetData,
-  updateSheetData,
-} from "../sheet/api";
+  createTechSheetData,
+  deleteTechSheetData,
+  getAllTechSheetData,
+  updateTechSheetData,
+} from "./api";
 
-export interface CandidateData {
-  _id: string;
-  sheetName: string;
-  sheetRange: string;
-}
+export type TechSheet = {
+  id: string;
+  technicianName: string;
+  sheetID: string;
+};
 
-const useCandidate = () => {
-  const [allCandidateData, setAllCandidateData] = useState<CandidateData[]>([]);
+const useTechnician = () => {
+  const [allTechnicianData, setAllTechnicianData] = useState<TechSheet[]>([]);
   const [editMode, setEditMode] = useState<string | null>(null);
-  const [newCandidate, setNewCandidate] = useState<CandidateData>({
-    _id: "",
-    sheetName: "",
-    sheetRange: "",
+  const [newTechSheetData, setNewTechSheetData] = useState<TechSheet>({
+    id: "",
+    technicianName: "",
+    sheetID: "",
   });
 
   const loadAllData = async () => {
     try {
-      const response = await getAllSheetData();
-      setAllCandidateData(response);
+      const response = await getAllTechSheetData();
+      setAllTechnicianData(response);
     } catch (err) {
       console.error("Error loading sheet data:", err);
       toast({
@@ -39,8 +38,8 @@ const useCandidate = () => {
 
   const handleSave = async () => {
     try {
-      const { _id, ...candidate } = newCandidate;
-      await createSheetData(candidate);
+      const { id, ...TechnicianSheetData } = newTechSheetData;
+      await createTechSheetData(TechnicianSheetData);
       loadAllData();
 
       toast({
@@ -59,7 +58,7 @@ const useCandidate = () => {
 
   const handleDelete = async (id: any) => {
     try {
-      await deleteSheetData(id);
+      await deleteTechSheetData(id);
       loadAllData();
       toast({
         title: "Success",
@@ -74,22 +73,22 @@ const useCandidate = () => {
     }
   };
 
-  const handleEdit = (sheetName: string) => {
-    setEditMode(sheetName);
-    const candidateData: any = allCandidateData.filter(
-      (data) => data.sheetName === sheetName
+  const handleEdit = (TechnicianName: string) => {
+    setEditMode(TechnicianName);
+    const candidateData: any = allTechnicianData.filter(
+      (data) => data.technicianName === TechnicianName
     );
-    setNewCandidate(candidateData[0]);
+    setNewTechSheetData(candidateData[0]);
   };
 
   const handleUpdate = async () => {
     if (!editMode) return;
 
     try {
-      await updateSheetData(newCandidate);
+      await updateTechSheetData(newTechSheetData);
       loadAllData();
       setEditMode(null);
-      setNewCandidate({ _id: "", sheetName: "", sheetRange: "" });
+      setNewTechSheetData({ id: "", technicianName: "", sheetID: "" });
       toast({
         title: "Success",
         description: "sheets data updated successfully",
@@ -104,7 +103,7 @@ const useCandidate = () => {
   };
 
   const handleAdd = () => {
-    setNewCandidate({ _id: "", sheetName: "", sheetRange: "" });
+    setNewTechSheetData({ id: "", technicianName: "", sheetID: "" });
     handleSave();
   };
 
@@ -112,14 +111,14 @@ const useCandidate = () => {
     loadAllData();
   }, []);
   return {
-    states: { allCandidateData, editMode, newCandidate },
+    states: { allTechnicianData, editMode, newTechSheetData },
     handlers: {
       handleAdd,
       handleEdit,
-      setNewCandidate,
+      setNewTechSheetData,
     },
     apiCalls: { handleUpdate, handleDelete, handleSave },
   };
 };
 
-export default useCandidate;
+export default useTechnician;

@@ -37,8 +37,10 @@ const createEmptySession = (): SessionData => ({
 // Initial State
 export const initialState: CandidateSessionsData = {
   id: "",
+  isSheetUpdated: false,
+  todayStartRange: 2,
   candidateName: "",
-  "ra/technicianName": "",
+  raTechnicianName: "",
   currentSession: 0,
   sessions: Array.from({ length: TOTAL_SESSIONS }, createEmptySession),
   isCreated: false,
@@ -57,6 +59,9 @@ const sessionSlice = createSlice({
     },
     setCandidateName(state, action: PayloadAction<string>) {
       state.candidateName = action.payload;
+    },
+    setRaTechnicianName(state, action: PayloadAction<string>) {
+      state.raTechnicianName = action.payload;
     },
     setCurrentSession(state, action: PayloadAction<"prev" | "next" | number>) {
       switch (action.payload) {
@@ -109,15 +114,15 @@ const sessionSlice = createSlice({
       state.date = action.payload;
     },
     toggleSessionInProgress(state, action: PayloadAction<boolean>) {
-      action.payload
-        ? ((state.sessions = Array.from(
-            { length: TOTAL_SESSIONS },
-            createEmptySession
-          )),
+      const { isSessionInProgress, ...other } = state;
+      !action.payload
+        ? ((state.isSessionInProgress = false), (state.currentSession = 0))
+        : ((state.sessions = initialState.sessions),
           (state.currentSession = 0),
           (state.isSessionInProgress = true),
-          ((state.id = ""), (state.isCreated = false), (state.updatedAt = "")))
-        : (state.isSessionInProgress = action.payload);
+          ((state.id = ""), (state.isCreated = false), (state.updatedAt = ""))),
+        (state.isSheetUpdated = false),
+        (state.todayStartRange = initialState.todayStartRange);
     },
     updateSessionUpdateInGoogleSheet(
       state,
@@ -144,6 +149,16 @@ const sessionSlice = createSlice({
       );
       state = initialState;
       state.isSessionInProgress = true;
+    },
+    updateSheet(
+      state,
+      action: PayloadAction<{
+        isSheetUpdated?: boolean;
+        todayStartRange?: number;
+      }>
+    ) {
+      state.isSheetUpdated = action.payload.isSheetUpdated || false;
+      state.todayStartRange = action.payload.todayStartRange || 0;
     },
   },
 
@@ -230,6 +245,8 @@ export const {
   updateSessionUpdateInGoogleSheet,
   clearSessionTimings,
   startNew,
+  setRaTechnicianName,
+  updateSheet,
 } = sessionSlice.actions;
 
 // Reducer
