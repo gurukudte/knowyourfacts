@@ -114,15 +114,15 @@ const sessionSlice = createSlice({
       state.date = action.payload;
     },
     toggleSessionInProgress(state, action: PayloadAction<boolean>) {
-      action.payload
-        ? ((state.sessions = Array.from(
-            { length: TOTAL_SESSIONS },
-            createEmptySession
-          )),
+      const { isSessionInProgress, ...other } = state;
+      !action.payload
+        ? ((state.isSessionInProgress = false), (state.currentSession = 0))
+        : ((state.sessions = initialState.sessions),
           (state.currentSession = 0),
           (state.isSessionInProgress = true),
-          ((state.id = ""), (state.isCreated = false), (state.updatedAt = "")))
-        : (state.isSessionInProgress = action.payload);
+          ((state.id = ""), (state.isCreated = false), (state.updatedAt = ""))),
+        (state.isSheetUpdated = false),
+        (state.todayStartRange = initialState.todayStartRange);
     },
     updateSessionUpdateInGoogleSheet(
       state,

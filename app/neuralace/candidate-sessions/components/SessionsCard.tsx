@@ -21,13 +21,22 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCandidateFromSearchParams } from "../slices/DashboardCandidateSessionsSlice";
 import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
 
 export function SessionList() {
-  const { candidateNames, candidateName, candidateDate, filteredSession } =
-    useAppSelector((state) => state.DashboardCandidateSessions);
+  const {
+    candidateNames,
+    candidateName,
+    candidateDate,
+    filteredSession,
+    candidatesSessions,
+  } = useAppSelector((state) => state.DashboardCandidateSessions);
   const dispatch = useAppDispatch();
 
-  console.log(filteredSession);
+  useEffect(() => {
+    console.log(candidateNames);
+  }, [filteredSession]);
+
   return (
     <div className="p-4">
       <div className="flex justify-between">

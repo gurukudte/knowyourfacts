@@ -13,6 +13,41 @@ export interface UpdateSheetRequest {
   spreadsheetId: string;
 }
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const spreadsheetId = searchParams.get("spreadsheetId");
+    if (!spreadsheetId) {
+      return NextResponse.json(
+        { error: "Invalid request data" },
+        { status: 400 }
+      );
+    }
+    const auth = getGoogleServiceAccount();
+    const sheets = google.sheets({ version: "v4", auth });
+    try {
+      const sheetData = await sheets.spreadsheets.get({ spreadsheetId });
+
+      const sheetNames =
+        sheetData.data.sheets?.map((sheet) => sheet.properties?.title) || [];
+      const filteredSheetNames = sheetNames.filter(
+        (sheetName) => sheetName !== "Feedbacks"
+      );
+      return NextResponse.json({ data: filteredSheetNames });
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Service account does not have access to this sheet" },
+        { status: 403 }
+      );
+    }
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as UpdateSheetRequest;

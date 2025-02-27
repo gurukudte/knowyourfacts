@@ -21,21 +21,21 @@ const SessionLayout = () => {
   }, [isSessionInProgress]);
   return (
     <>
-      {session < 14 ? (
-        <>
-          <div className="relative h-screen flex flex-col">
-            <Header />
-            <main className="w-full px-4">
-              <div className="my-28">
-                {!isSessionInProgress ? <StartScreen /> : <MainRecording />}
-              </div>
-            </main>
-            <Footer />
+      <div className="relative h-screen flex flex-col">
+        <Header />
+        <main className="w-full px-4">
+          <div className="my-28">
+            {!isSessionInProgress ? (
+              <StartScreen />
+            ) : session >= 14 ? (
+              <EndScreen />
+            ) : (
+              <MainRecording />
+            )}
           </div>
-        </>
-      ) : (
-        <EndScreen />
-      )}
+        </main>
+        {session < 14 && <Footer />}
+      </div>
     </>
   );
 };

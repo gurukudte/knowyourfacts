@@ -11,6 +11,7 @@ export const publicRoutes = [
   "/terms",
   "/neuralace/mobile/sheet",
   "/neuralace/tech-sheet",
+  "/neuralace/candidate-sessions",
   "/api/sheet",
   "/api/candidate-sessions",
   "/api/googlesheet",

@@ -18,25 +18,41 @@ export function Header() {
         </Label>
       ) : (
         <div className="flex flex-col gap-4 bg-background z-10">
-          <div className="relative flex justify-center items-center">
-            <h1 className="w-full text-xl font-bold text-center">
-              Session {currentSession + 1}/{TOTAL_SESSIONS}
-            </h1>
-          </div>
+          {currentSession < 14 && (
+            <div className="relative flex justify-center items-center">
+              <h1 className="w-full text-xl font-bold text-center">
+                Session {currentSession + 1}/{TOTAL_SESSIONS}
+              </h1>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-2">
-            <Button
-              size="sm"
-              onClick={() => dispatch(setCurrentSession("prev"))}
-              disabled={currentSession === 0}
-            >
-              Previous
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => dispatch(setCurrentSession("next"))}
-            >
-              Next
-            </Button>
+            {currentSession >= 14 ? (
+              <div className="flex items-center ">
+                <Button
+                  variant={"default"}
+                  onClick={() => dispatch(setCurrentSession("prev"))}
+                >
+                  Go Back
+                </Button>
+                <p className="ml-20 text-xl font-bold">Shift Feedback Form</p>
+              </div>
+            ) : (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => dispatch(setCurrentSession("prev"))}
+                  disabled={currentSession === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => dispatch(setCurrentSession("next"))}
+                >
+                  Next
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

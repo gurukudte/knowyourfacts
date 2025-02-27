@@ -1,30 +1,13 @@
 import { formatTime } from "./useTimeHook";
 import { useState } from "react";
-import useCandidate from "./useCandidateHook";
 import { SessionData, VideoData } from "../types/sessionTypes";
+import { after } from "node:test";
 
 /**
  * Custom hook for handling WhatsApp sharing and Google Sheets integration.
  */
 const useActions = () => {
-  const {
-    states: { allCandidateData },
-  } = useCandidate();
   const [loading, setLoading] = useState(false);
-
-  const formatSessionData = (session: SessionData, sessionIndex: number) =>
-    session.videos.map((video: VideoData, index: number) => [
-      index === 0 ? session.sessionId : "", // Session ID in the first row
-      index === 0 ? sessionIndex + 1 : "", // Session number in the first row
-      index + 1, // Video number
-      video.startTime !== "00:00:00" ? formatTime(video.startTime) : "", // Start time
-      video.endTime !== "00:00:00" ? formatTime(video.endTime) : "", // End time
-      `${formatTime(video.startTime)} - ${formatTime(video.endTime)}`, // Time range
-      index === 0
-        ? `H-${session.highImpedance}K/L-${session.lowImpedance}K`
-        : "", // Impedance in the first row
-      video.notes || "NO NOTES", // Video notes
-    ]);
 
   const shareToWhatsApp = (
     currentSessionData: SessionData,
@@ -106,9 +89,6 @@ const useActions = () => {
         ["SHIFT A"]
       );
 
-      const { sheetRange } = allCandidateData.find(
-        (data) => data.sheetName === candidate
-      )!;
       const ranges = [
         { startRange: 0, endRange: 8 },
         { startRange: 9, endRange: 15 },
@@ -166,7 +146,9 @@ const useActions = () => {
 
   const updateFeedBackToGoogleSheet = async (
     values: string[][],
-    sheetId: string
+    sheetId: string,
+    candidate: string,
+    afterUpdate: () => void
   ) => {
     try {
       setLoading(true);
@@ -176,6 +158,7 @@ const useActions = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          candidateName: candidate,
           action: "updateFeedback",
           range: "HI",
           values,
@@ -184,8 +167,11 @@ const useActions = () => {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to update sheet");
-      console.log("Success:", data.message);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update sheet");
+      } else {
+        afterUpdate();
+      }
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -203,3 +189,15 @@ const useActions = () => {
 };
 
 export default useActions;
+
+const formatSessionData = (session: SessionData, sessionIndex: number) =>
+  session.videos.map((video: VideoData, index: number) => [
+    index === 0 ? session.sessionId : "", // Session ID in the first row
+    index === 0 ? sessionIndex + 1 : "", // Session number in the first row
+    index + 1, // Video number
+    video.startTime !== "00:00:00" ? formatTime(video.startTime) : "", // Start time
+    video.endTime !== "00:00:00" ? formatTime(video.endTime) : "", // End time
+    `${formatTime(video.startTime)} - ${formatTime(video.endTime)}`, // Time range
+    index === 0 ? `H-${session.highImpedance}K/L-${session.lowImpedance}K` : "", // Impedance in the first row
+    video.notes || "NO NOTES", // Video notes
+  ]);
