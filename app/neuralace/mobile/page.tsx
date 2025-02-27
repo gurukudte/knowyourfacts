@@ -1,8 +1,6 @@
 "use client";
 
 import SessionLayout from "./components/layout/Layout";
-import { Provider } from "react-redux";
-import store from "../../../store";
 
 /**
  * Tool Recording Component

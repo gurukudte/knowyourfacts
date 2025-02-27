@@ -19,6 +19,7 @@ import {
 import { FormError } from "@/components/auth/form-error";
 import { FormSuccess } from "@/components/auth/form-success";
 import login from "@/actions/login";
+import Socials from "../Socials";
 
 interface IUserDetails {
   email: string;
@@ -51,7 +52,7 @@ function SignUp() {
     <div className="h-full flex bg-[#2c2638]">
       <div className="w-1/2"></div>
       <div className="w-1/2 flex justify-center items-center">
-        <div className="w-full p-14  flex flex-col gap-4">
+        <div className=" p-14  flex flex-col gap-4">
           <h1 className="text-white scroll-m-20 text-4xl font-semibold tracking-tight lg:text-5xl">
             Welcome Back!
           </h1>
@@ -116,16 +117,7 @@ function SignUp() {
               <div>
                 <Separator />
               </div>
-              <div className="flex gap-4">
-                <Button size="icon" className="w-full" disabled={isPending}>
-                  <FcGoogle />
-                  Google
-                </Button>
-                <Button size="icon" className="w-full" disabled={isPending}>
-                  <FaGithub />
-                  Github
-                </Button>
-              </div>
+              <Socials isPending={isPending} />
               <div className="flex gap-2 ju items-center">
                 <p className="text-[#746E80] font-bold leading-7 [&:not(:first-child)]:mt-6">
                   Don't have an account?

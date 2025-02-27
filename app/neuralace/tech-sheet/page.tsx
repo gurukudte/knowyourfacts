@@ -13,14 +13,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
-import useCandidate from "../hooks/useCandidateHook";
+import useTechnician from "./useTechnicianHook";
 
 export default function JsonEditor() {
   const {
-    states: { allCandidateData, editMode, newCandidate },
-    handlers: { handleAdd, handleEdit, setNewCandidate },
+    states: { allTechnicianData, editMode, newTechSheetData },
+    handlers: { handleAdd, handleEdit, setNewTechSheetData },
     apiCalls: { handleUpdate, handleDelete },
-  } = useCandidate();
+  } = useTechnician();
 
   return (
     <div className="w-full container py-10 flex justify-center items-center">
@@ -33,27 +33,27 @@ export default function JsonEditor() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="sheetName">Sheet Name</Label>
+              <Label htmlFor="technicianName">Technician Name</Label>
               <Input
-                id="sheetName"
-                value={newCandidate.sheetName}
+                id="technicianName"
+                value={newTechSheetData.technicianName}
                 onChange={(e) =>
-                  setNewCandidate({
-                    ...newCandidate,
-                    sheetName: e.target.value,
+                  setNewTechSheetData({
+                    ...newTechSheetData,
+                    technicianName: e.target.value,
                   })
                 }
               />
             </div>
             <div>
-              <Label htmlFor="startRange">Start Range</Label>
+              <Label htmlFor="sheetId">Sheet ID</Label>
               <Input
-                id="startRange"
-                value={newCandidate.sheetRange}
+                id="sheetId"
+                value={newTechSheetData.sheetID}
                 onChange={(e) =>
-                  setNewCandidate({
-                    ...newCandidate,
-                    sheetRange: e.target.value,
+                  setNewTechSheetData({
+                    ...newTechSheetData,
+                    sheetID: e.target.value,
                   })
                 }
               />
@@ -67,28 +67,28 @@ export default function JsonEditor() {
             {editMode ? "Update" : "Add New Entry"}
           </Button>
           <div className=" flex justify-center items-center">
-            {allCandidateData.length > 0 ? (
+            {allTechnicianData.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Sheet Name</TableHead>
-                    <TableHead>Start Range</TableHead>
+                    <TableHead>Technician Name</TableHead>
+                    <TableHead>Sheet ID</TableHead>
                     <TableHead className="flex justify-center items-center">
                       Actions
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allCandidateData.map((data, index) => (
+                  {allTechnicianData.map((data, index) => (
                     <TableRow key={index}>
-                      <TableCell>{data.sheetName}</TableCell>
-                      <TableCell>{data.sheetRange}</TableCell>
+                      <TableCell>{data.technicianName}</TableCell>
+                      <TableCell>{data.sheetID}</TableCell>
                       <TableCell className="space-x-2 flex justify-center items-center">
                         <Button
                           disabled={editMode !== null}
                           variant="outline"
                           size="icon"
-                          onClick={() => handleEdit(data.sheetName)}
+                          onClick={() => handleEdit(data.technicianName)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -96,7 +96,7 @@ export default function JsonEditor() {
                           disabled={editMode !== null}
                           variant="outline"
                           size="icon"
-                          onClick={() => handleDelete(data._id)}
+                          onClick={() => handleDelete(data.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -108,7 +108,7 @@ export default function JsonEditor() {
             ) : (
               <div className="p-8">
                 <span className="flex items-center gap-2">
-                  {allCandidateData ? (
+                  {allTechnicianData ? (
                     <>
                       <span>No Data</span>
                     </>

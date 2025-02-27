@@ -1,13 +1,17 @@
 "use server";
 
-import { SignupSchema } from "@/schemas";
-
 const signup = async (values: any) => {
-  const validatedFields = SignupSchema.safeParse(values);
-  if (!validatedFields.success) {
-    return { error: "Invalid fields" };
+  try {
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    return await response.json();
+  } catch (error) {
+    return { error: "Something went wrong" };
   }
-  return { success: "Email sent!" };
 };
 
 export default signup;
