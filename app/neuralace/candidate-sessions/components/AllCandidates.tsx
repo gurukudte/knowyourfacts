@@ -8,14 +8,16 @@ import {
 } from "@/components/ui/card";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCandidateFromSearchParams } from "../slices/DashboardCandidateSessionsSlice";
 
 export interface IAppProps {}
 
 export function CandidateSessions() {
-  const { filteredSessions } = useAppSelector(
+  const { filteredSessions, candidateName } = useAppSelector(
     (state) => state.DashboardCandidateSessions
   );
+  const dispatch = useAppDispatch();
   return (
     <main className="h-[calc(100vh-3.5rem)]">
       <div className="p-6 space-y-8 ">
@@ -69,7 +71,19 @@ export function CandidateSessions() {
                       </p>
                     </CardContent>
                     <CardFooter className="text-right">
-                      <Button variant={"secondary"}>View Details</Button>
+                      <Button
+                        variant={"secondary"}
+                        onClick={() =>
+                          dispatch(
+                            setCandidateFromSearchParams({
+                              candidate: candidateName,
+                              date: candidate.date,
+                            })
+                          )
+                        }
+                      >
+                        View Details
+                      </Button>
                     </CardFooter>
                   </Card>
                 ))}

@@ -18,20 +18,20 @@ const socket = io(process.env.NEXT_PUBLIC_LIVE_BASE_URI);
 export default function AdminDashboard() {
   const [candidates, setCandidates] = useState<any>([]);
 
-  useEffect(() => {
-    // Listen for candidate updates
-    socket.on("adminViewUpdate", (data) => {
-      console.log(candidates);
-      const array = candidates;
-      array.filter((arr: any) => arr.candidateId === data?.candidateId)
-        .length === 0 && array.push(data);
-      setCandidates(array);
-    });
+  // useEffect(() => {
+  //   // Listen for candidate updates
+  //   socket.on("adminViewUpdate", (data) => {
+  //     console.log(candidates);
+  //     const array = candidates;
+  //     array.filter((arr: any) => arr.candidateId === data?.candidateId)
+  //       .length === 0 && array.push(data);
+  //     setCandidates(array);
+  //   });
 
-    return () => {
-      socket.off("adminViewUpdate");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("adminViewUpdate");
+  //   };
+  // }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">

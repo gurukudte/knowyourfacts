@@ -44,7 +44,11 @@ export function useSyncCandidate() {
 
   useEffect(() => {
     // Update URL when candidateName in Redux changes
-    if (candidateName) {
+    if (candidateName !== "" && candidateDate === "") {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("candidate", candidateName);
+      router.replace(`?${newParams.toString()}`, { scroll: false });
+    } else if (candidateDate !== "") {
       const newParams = new URLSearchParams(searchParams);
       newParams.set("candidate", candidateName);
       newParams.set("date", candidateDate);

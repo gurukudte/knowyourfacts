@@ -76,21 +76,21 @@ export default function MainRecording() {
     }
   }, [sessions]);
 
-  useEffect(() => {
-    // Function to send updates
-    const sendLiveUpdate = async () => {
-      try {
-        socket.emit("candidateUpdate", {
-          candidateId: store.candidateName, // Use unique candidate ID
-          sessionData: sessions,
-        });
-      } catch (error) {}
-    };
+  // useEffect(() => {
+  //   // Function to send updates
+  //   const sendLiveUpdate = async () => {
+  //     try {
+  //       socket.emit("candidateUpdate", {
+  //         candidateId: store.candidateName, // Use unique candidate ID
+  //         sessionData: sessions,
+  //       });
+  //     } catch (error) {}
+  //   };
 
-    // Send updates every 5 seconds
-    const interval = setInterval(sendLiveUpdate, 5000);
-    return () => clearInterval(interval);
-  }, [currentSession, sessions]);
+  //   // Send updates every 5 seconds
+  //   const interval = setInterval(sendLiveUpdate, 5000);
+  //   return () => clearInterval(interval);
+  // }, [currentSession, sessions]);
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">

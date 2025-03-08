@@ -5,14 +5,18 @@ import Link from "next/link";
 import { SessionList } from "@/app/neuralace/candidate-sessions/components/SessionsCard";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
-import { fetchCandidateSessions } from "@/app/neuralace/candidate-sessions/slices/DashboardCandidateSessionsSlice";
+import {
+  fetchCandidateSessions,
+  setCandidateFromSearchParams,
+} from "@/app/neuralace/candidate-sessions/slices/DashboardCandidateSessionsSlice";
 import { PacmanLoader } from "react-spinners";
 import { useSyncCandidate } from "@/app/neuralace/candidate-sessions/hooks/useSyncCandidate";
+import { CandidateSessions } from "../AllCandidates";
+import { CandidateDates } from "../CandidateDates";
 
 const SessionsDisplay = () => {
-  const { candidateNames, candidateName } = useAppSelector(
-    (state) => state.DashboardCandidateSessions
-  );
+  const { candidateNames, candidateName, candidateDate, filteredSessions } =
+    useAppSelector((state) => state.DashboardCandidateSessions);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -20,6 +24,7 @@ const SessionsDisplay = () => {
   }, []);
 
   useSyncCandidate();
+  console.log({ name: candidateName, date: candidateDate });
   return (
     <div className="flex h-screen bg-secondary text-primary-foreground">
       {/* Sidebar */}
@@ -33,12 +38,20 @@ const SessionsDisplay = () => {
               <Button
                 key={candidate}
                 variant={"ghost"}
-                size={"lg"}
-                className={`w-full font-bold justify-start ${
+                size={"sm"}
+                className={`w-full font-semibold justify-start ${
                   candidate === candidateName
                     ? "bg-accent text-accent-foreground"
                     : ""
                 }`}
+                onClick={() =>
+                  dispatch(
+                    setCandidateFromSearchParams({
+                      candidate: candidate,
+                      date: "",
+                    })
+                  )
+                }
               >
                 {candidate}
               </Button>
@@ -48,34 +61,17 @@ const SessionsDisplay = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-secondary-foreground">
+      <div className="flex-1 bg-secondary-foreground overflow-hidden">
         {/* Top Navigation Bar */}
         <nav className="h-14 border-b px-4 flex items-center bg-secondary-foreground">
           <h1 className="text-xl font-semibold ">{`${
             candidateName === "" ? "Candidate" : candidateName
           }'s Sessions Data`}</h1>
         </nav>
-        {candidateNames.length > 0 ? (
-          <SessionList />
-        ) : (
-          <div className={`w-full h-[82vh] flex justify-center items-center`}>
-            <PacmanLoader size={35} color="white" />
-          </div>
-        )}
-        <div className="p-2">
-          {/* <div>
 
-          {typeof candidateDate === "undefined" ? (
-            <>
-              {candidateName === "" ? (
-                <CandidateSessions />
-              ) : (
-                <CandidateDates />
-              )} 
-            </>
-          ) : (
-          )}
-          </div> */}
+        <div className="p-4 overflow-y-scroll">
+          {candidateName !== "" && candidateDate === "" && <CandidateDates />}
+          {candidateName !== "" && candidateDate !== "" && <SessionList />}
         </div>
       </div>
     </div>
