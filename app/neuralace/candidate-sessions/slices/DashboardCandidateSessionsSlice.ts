@@ -43,19 +43,18 @@ const DashboardCandidateSessionsSlice = createSlice({
       action: PayloadAction<{ candidate?: string; date?: string }>
     ) => {
       const { candidate, date } = action.payload;
-      if (candidate) {
-        state.candidateName = candidate || "";
-      }
-      if (date) {
-        state.candidateDate = date || "";
-      }
+
+      state.candidateName = candidate || "";
+      state.candidateDate = date || "";
+
       const filtered = state.candidatesSessions.filter(
         (session) => session.candidateName === candidate
       );
       const fil = filtered.filter(
         (session) =>
           session.candidateName === state.candidateName &&
-          session.date === state.candidateDate
+          session.date === state.candidateDate &&
+          session.candidateName !== ""
       )[0]?.sessions;
       state.filteredSession = fil;
       state.filteredSessions = filtered;

@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
-        "neuralace"
+        "neuralace",
+        "papaparse"
     ],
     "editor.cursorBlinking": "smooth",
     "editor.cursorStyle": "line-thin"

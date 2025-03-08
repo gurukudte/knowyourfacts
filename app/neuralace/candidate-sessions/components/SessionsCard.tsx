@@ -24,18 +24,9 @@ import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
 
 export function SessionList() {
-  const {
-    candidateNames,
-    candidateName,
-    candidateDate,
-    filteredSession,
-    candidatesSessions,
-  } = useAppSelector((state) => state.DashboardCandidateSessions);
+  const { candidateNames, candidateName, candidateDate, filteredSession } =
+    useAppSelector((state) => state.DashboardCandidateSessions);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    console.log(candidateNames);
-  }, [filteredSession]);
 
   return (
     <div className="p-4">

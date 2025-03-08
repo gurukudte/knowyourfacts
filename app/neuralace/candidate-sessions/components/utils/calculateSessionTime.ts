@@ -4,7 +4,6 @@ import { SessionData } from "@/app/neuralace/mobile/types/sessionTypes";
 const calculateTimeDiffInSeconds = (startTime: string, endTime: string) => {
   const start = startTime.split(":").map(Number);
   const end = endTime.split(":").map(Number);
-  console.log(startTime, endTime);
   // Convert to seconds
   const startInSeconds = start[0] * 3600 + start[1] * 60 + start[2];
   const endInSeconds = end[0] * 3600 + end[1] * 60 + end[2];

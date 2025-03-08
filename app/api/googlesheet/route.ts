@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       const { lastRow } = await getLastUpdatedRowAndColumn(
         sheets,
         spreadsheetId,
-        "GURU",
+        candidateName,
         "A:J"
       );
       console.log("lastRow", lastRow);
