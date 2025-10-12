@@ -9,7 +9,7 @@ import WeekSettings from './components/WeekSettings'
 import RosterGenerator from './components/roaster-generator/RosterGenerator'
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("volunteers");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const renderContent = () => {
     switch (activeTab) {
