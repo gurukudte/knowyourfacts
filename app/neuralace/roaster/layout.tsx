@@ -1,6 +1,5 @@
-
 import React from "react";
-import AppProvider from "./components/AppProvider";
+import { AppProvider } from "./context/AppContext";
 
 export default function Layout({
   children,
@@ -9,9 +8,7 @@ export default function Layout({
 }>) {
   return (
     <>
-      <AppProvider>
-        {children}
-      </AppProvider>
+      <AppProvider>{children}</AppProvider>
     </>
   );
 }

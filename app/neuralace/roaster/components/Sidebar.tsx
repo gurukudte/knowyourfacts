@@ -14,9 +14,15 @@ const menuItems = [
   { id: 'roster', label: 'Roster', icon: Calendar },
 ]
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+interface SidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+ }
+
+
+export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   return (
-    <div className="w-64 bg-white shadow-sm h-[calc(100vh-4rem)]">
+    <div className="w-64 bg-white shadow-sm h-[calc(100vh-4.5em)]">
       <nav className="mt-8">
         <ul className="space-y-2 px-4">
           {menuItems.map((item) => {

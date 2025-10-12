@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
-import { useAppContext } from '@/context/AppContext'
+import { useAppContext } from '../context/AppContext'
 
 export default function ShiftManager() {
   const { shifts, addShift, removeShift } = useAppContext()

@@ -1,5 +1,5 @@
 import { Users, Clock, Calendar } from 'lucide-react'
-import { useAppContext } from '@/context/AppContext'
+import { useAppContext } from '../context/AppContext'
 
 export default function Dashboard() {
   const { volunteers, shifts, weekSettings } = useAppContext()

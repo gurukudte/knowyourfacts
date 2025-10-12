@@ -16,6 +16,7 @@ export const publicRoutes = [
   "/api/candidate-sessions",
   "/api/googlesheet",
   "/api/tech-sheet",
+  "/neuralace/roaster",
 ];
 
 /**
