@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Download } from "lucide-react";
 import { useAppContext } from "@/app/neuralace/roaster/context/AppContext";
+import { Input } from "@/components/ui/input";
 
 export default function RosterGenerator() {
   const { volunteers, shifts, generateRoster } = useAppContext();
@@ -9,93 +10,92 @@ export default function RosterGenerator() {
   const [daysToGenerate, setDaysToGenerate] = useState(7);
   const [generatedRoster, setGeneratedRoster] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [totalVolunteersPerShift, setTotalVolunteersPerShift] = useState(4);
 
   const scrollableRef = useRef(null);
 
   // Function to split volunteers equally based on preferred shifts
- const splitVolunteersByShift = (volunteers, shifts, targetCount) => {
-   const shiftGroups = {};
+  const splitVolunteersByShift = (volunteers, shifts, targetCount) => {
+    const shiftGroups = {};
 
-   // Initialize shift groups
-   shifts.forEach((shift) => {
-     shiftGroups[shift.name] = {
-       volunteers: [],
-       capacity: 0,
-     };
-   });
-   
+    // Initialize shift groups
+    shifts.forEach((shift) => {
+      shiftGroups[shift.name] = {
+        volunteers: [],
+        capacity: 0,
+      };
+    });
 
-   // Assign volunteers strictly to their preferred shift
-   volunteers.forEach((volunteer) => {
-     const preferred = volunteer.preferredShift;
-     if (preferred && shiftGroups[preferred]) {
-       shiftGroups[preferred].volunteers.push(volunteer);
-     }
-   });
+    // Assign volunteers strictly to their preferred shift
+    volunteers.forEach((volunteer) => {
+      const preferred = volunteer.preferredShift;
+      if (preferred && shiftGroups[preferred]) {
+        shiftGroups[preferred].volunteers.push(volunteer);
+      }
+    });
 
-   // Handle case where no one prefers any shift
-   const allEmpty = Object.values(shiftGroups).every(
-     (group) => group.volunteers.length === 0
-   );
+    // Handle case where no one prefers any shift
+    const allEmpty = Object.values(shiftGroups).every(
+      (group) => group.volunteers.length === 0
+    );
 
-   if (allEmpty) {
-     // If no preferences exist, distribute volunteers equally
-     const volunteersPerShift = Math.ceil(volunteers.length / shifts.length);
-     let index = 0;
-     shifts.forEach((shift) => {
-       shiftGroups[shift.name].volunteers = volunteers.slice(
-         index,
-         index + volunteersPerShift
-       );
-       index += volunteersPerShift;
-     });
-   }
+    if (allEmpty) {
+      // If no preferences exist, distribute volunteers equally
+      const volunteersPerShift = Math.ceil(volunteers.length / shifts.length);
+      let index = 0;
+      shifts.forEach((shift) => {
+        shiftGroups[shift.name].volunteers = volunteers.slice(
+          index,
+          index + volunteersPerShift
+        );
+        index += volunteersPerShift;
+      });
+    }
 
-   // Calculate total preferred volunteers
-   const totalPreferred = Object.values(shiftGroups).reduce(
-     (sum, group) => sum + group.volunteers.length,
-     0
-   );
+    // Calculate total preferred volunteers
+    const totalPreferred = Object.values(shiftGroups).reduce(
+      (sum, group) => sum + group.volunteers.length,
+      0
+    );
 
-   // Assign shift capacities based on proportion of preferred volunteers
-   Object.keys(shiftGroups).forEach((shiftName) => {
-     const group = shiftGroups[shiftName];
-     if (totalPreferred > 0) {
-       group.capacity = Math.max(
-         1,
-         Math.round((group.volunteers.length / totalPreferred) * targetCount)
-       );
-     } else {
-       // If no preferred volunteers, distribute equally
-       group.capacity = Math.max(1, Math.floor(targetCount / shifts.length));
-     }
-   });
+    // Assign shift capacities based on proportion of preferred volunteers
+    Object.keys(shiftGroups).forEach((shiftName) => {
+      const group = shiftGroups[shiftName];
+      if (totalPreferred > 0) {
+        group.capacity = Math.max(
+          1,
+          Math.round((group.volunteers.length / totalPreferred) * targetCount)
+        );
+      } else {
+        // If no preferred volunteers, distribute equally
+        group.capacity = Math.max(1, Math.floor(targetCount / shifts.length));
+      }
+    });
 
-   // Adjust total capacities to match targetCount exactly (without violating ratios too much)
-   const totalCapacity = Object.values(shiftGroups).reduce(
-     (sum, group) => sum + group.capacity,
-     0
-   );
+    // Adjust total capacities to match targetCount exactly (without violating ratios too much)
+    const totalCapacity = Object.values(shiftGroups).reduce(
+      (sum, group) => sum + group.capacity,
+      0
+    );
 
-   let diff = targetCount - totalCapacity;
-   const shiftNames = Object.keys(shiftGroups);
-   let i = 0;
+    let diff = targetCount - totalCapacity;
+    const shiftNames = Object.keys(shiftGroups);
+    let i = 0;
 
-   while (diff !== 0) {
-     const shiftName = shiftNames[i % shiftNames.length];
-     if (diff > 0) {
-       shiftGroups[shiftName].capacity++;
-       diff--;
-     } else if (diff < 0 && shiftGroups[shiftName].capacity > 1) {
-       shiftGroups[shiftName].capacity--;
-       diff++;
-     }
-     i++;
-   }
+    while (diff !== 0) {
+      const shiftName = shiftNames[i % shiftNames.length];
+      if (diff > 0) {
+        shiftGroups[shiftName].capacity++;
+        diff--;
+      } else if (diff < 0 && shiftGroups[shiftName].capacity > 1) {
+        shiftGroups[shiftName].capacity--;
+        diff++;
+      }
+      i++;
+    }
 
-   return shiftGroups;
- };
-
+    return shiftGroups;
+  };
 
   // Function to check if volunteer is available on a specific day
   const isVolunteerAvailable = (volunteer, date) => {
@@ -109,7 +109,10 @@ export default function RosterGenerator() {
 
     setTimeout(() => {
       const roster = [];
-      const totalVolunteersPerDay = Math.min(volunteers.length, 8);
+      const totalVolunteersPerDay = Math.min(
+        volunteers.length,
+        totalVolunteersPerShift * shifts.length
+      );
 
       // Get shift-based volunteer distribution
       const shiftDistribution = splitVolunteersByShift(
@@ -117,7 +120,7 @@ export default function RosterGenerator() {
         shifts,
         totalVolunteersPerDay
       );
-      console.log(shiftDistribution)
+
       for (let i = 0; i < daysToGenerate; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
@@ -134,7 +137,10 @@ export default function RosterGenerator() {
           const availableVolunteers = shiftGroup.volunteers.filter((v) =>
             isVolunteerAvailable(v, currentDate)
           );
-          
+          console.log(
+            `Date: ${dayRoster.dateString}, Shift: ${shiftName}, Capacity: ${shiftGroup.capacity}, Available Volunteers: ${availableVolunteers.length}`
+          );
+
           // Select volunteers for this shift based on preference and capacity
           let selectedVolunteers = [];
           const needed = shiftGroup.capacity;
@@ -173,16 +179,15 @@ export default function RosterGenerator() {
             //   selectedVolunteers.push(...otherVolunteers);
             // }
           }
-          console.log(shiftName,selectedVolunteers)
+
           dayRoster.shifts[shiftName] = {
             volunteers: selectedVolunteers,
             color: shifts.find((s) => s.name === shiftName)?.color || "#6B7280",
           };
         });
-
         roster.push(dayRoster);
       }
-      console.log(roster);
+      // console.log(roster);
       setGeneratedRoster(roster);
       setIsGenerating(false);
     }, 400);
@@ -240,7 +245,16 @@ export default function RosterGenerator() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Volunteers per shift
+              </label>
+              <Input
+                value={totalVolunteersPerShift}
+                placeholder="Enter volunteer count"
+                onChange={(e) => setTotalVolunteersPerShift(e.target.value)}
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Number of Days
@@ -256,32 +270,34 @@ export default function RosterGenerator() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                &nbsp;
-              </label>
-              <button
-                onClick={handleGenerateRoster}
-                disabled={isGenerating || volunteers.length === 0}
-                className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                {isGenerating ? "Generating..." : "Generate Roster"}
-              </button>
-            </div>
+            <div className="flex gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  &nbsp;
+                </label>
+                <button
+                  onClick={handleGenerateRoster}
+                  disabled={isGenerating || volunteers.length === 0}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  {isGenerating ? "Generating..." : "Generate Roster"}
+                </button>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                &nbsp;
-              </label>
-              <button
-                onClick={exportRoster}
-                disabled={generatedRoster.length === 0}
-                className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export Roster
-              </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  &nbsp;
+                </label>
+                <button
+                  onClick={exportRoster}
+                  disabled={generatedRoster.length === 0}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Roster
+                </button>
+              </div>
             </div>
           </div>
 
@@ -529,7 +545,7 @@ export default function RosterGenerator() {
             </div>
           ) : (
             /* Empty State */
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <div className=" w-full min-h-[530px] bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
               <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-900 mb-2">
                 No Roster Generated Yet
