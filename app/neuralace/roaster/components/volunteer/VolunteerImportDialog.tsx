@@ -41,9 +41,9 @@ export default function VolunteerImportDialog() {
     const transFormed: Volunteer[] = jsonData?.map((i: any, idx) => {
       return {
         id: idx,
-        name: i["Name"],
-        preferredShift: i["Preferred Shift"],
-        weekOffDays: i["Week Off Days"].split("/"),
+        name: i["name"],
+        preferredShift: i["preferred_shift"],
+        weekOffDays: i["weekOff"].split("/"),
       };
     });
     console.log(transFormed);
@@ -68,14 +68,16 @@ export default function VolunteerImportDialog() {
     const sample = [
       {
         name: "John Doe",
-        phone: "9876543210",
-        preferredShift: "Morning",
+        email_id: "volunteer1@gmail.com",
+        phone: "1234567890",
+        preferred_shift: "Morning",
         weekOff: "Sunday",
       },
       {
         name: "Jane Smith",
-        phone: "9123456780",
-        preferredShift: "Evening",
+        email_id: "volunteer2@gmail.com",
+        phone: "0987654321",
+        preferred_shift: "Evening",
         weekOff: "Monday",
       },
     ];
