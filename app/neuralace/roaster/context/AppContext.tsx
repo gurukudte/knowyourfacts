@@ -39,6 +39,7 @@ interface AppContextType {
     updatedVolunteer: Omit<Volunteer, "id">
   ) => void;
   removeVolunteer: (id: number) => void;
+  bulkRemoveVolunteer: (ids: number[]) => void;
   bulkAddVolunteers: (newVolunteers: Volunteer[]) => void;
   setVolunteers: React.Dispatch<React.SetStateAction<Volunteer[]>>;
 
@@ -116,6 +117,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setVolunteers((prev) => prev.filter((v) => v.id !== id));
   };
 
+  const bulkRemoveVolunteer = (ids: number[]) => {
+    setVolunteers((prev) => prev.filter((v) => !ids.includes(v.id)));
+  };
+
   const bulkAddVolunteers = (newVolunteers: Volunteer[]) => {
     setVolunteers((prev) => [...prev, ...newVolunteers]);
   };
@@ -148,6 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addVolunteer,
     updateVolunteer,
     removeVolunteer,
+    bulkRemoveVolunteer,
     bulkAddVolunteers,
     setVolunteers,
 
@@ -159,7 +165,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setWeekSettings,
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+    </AppContext.Provider>
+  );
 }
 
 // ==== Hook ====
