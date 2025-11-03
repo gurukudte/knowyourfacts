@@ -9,7 +9,7 @@ const preloadedState: any = loadState(PERSISTED_STATE_KEY);
 const store = configureStore({
   reducer: {},
   preloadedState: {
-    session: preloadedState, // Use preloaded state if available
+    // session: preloadedState, // Use preloaded state if available
   },
 });
 // Subscribe to store changes and save the state to localStorage

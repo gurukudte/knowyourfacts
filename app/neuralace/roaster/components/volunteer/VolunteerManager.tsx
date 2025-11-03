@@ -8,23 +8,32 @@ import { Button } from "@/components/ui/button";
 import VolunteerHeader from "./VolunteerHeader";
 
 export default function VolunteerManager() {
-  const { volunteers, addVolunteer, removeVolunteer, shifts, updateVolunteer } =
-    useAppContext();
-  const [dialog, setDialog] = useState<"add" | "edit" | "delete" | null>(null);
+  const {
+    volunteers,
+    addVolunteer,
+    removeVolunteer,
+    bulkRemoveVolunteer,
+    shifts,
+    updateVolunteer,
+  } = useAppContext();
+  const [dialog, setDialog] = useState<
+    "add" | "edit" | "delete" | "multi-delete" | null
+  >(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [availableShifts, setAvailableShifts] = useState<Shift[]>([]);
   const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const handleFilteredResults = (vols: Volunteer[]) => {
     setFilteredVolunteers(vols);
+    setSelectedIds([]); // clear selection when filter changes
   };
 
   const getShiftDetails = (shiftName?: string) =>
     availableShifts.find((shift) => shift.name === shiftName);
 
   const editingVolunteer = useMemo(() => {
-    const editingVolunteer = volunteers.find((v) => v.id === editingId);
-    return editingVolunteer ? editingVolunteer : undefined;
+    return volunteers.find((v) => v.id === editingId);
   }, [volunteers, editingId]);
 
   const handleAddOrEdit = (
@@ -42,28 +51,62 @@ export default function VolunteerManager() {
     removeVolunteer(id);
   };
 
-  // Update available shifts when shifts context changes
+  const handleMultiDelete = () => {
+    bulkRemoveVolunteer(selectedIds);
+    setSelectedIds([]);
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredVolunteers.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredVolunteers.map((v) => v.id));
+    }
+  };
+
   useEffect(() => {
     setAvailableShifts(shifts || []);
     setFilteredVolunteers(volunteers);
   }, [shifts, volunteers]);
+
   return (
     <>
-      <div className="bg-white flex flex-col gap-4  rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white flex flex-col gap-4 rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Volunteers ({filteredVolunteers.length})
-            </h2>
-            <VolunteerHeader onFilterChange={handleFilteredResults} />
-            <Button
-              variant="default"
-              className="flex items-center gap-2"
-              onClick={() => setDialog("add")}
-            >
-              <Plus className="w-4 h-4" />
-              {"Add Volunteer"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Volunteers ({filteredVolunteers.length})
+              </h2>
+              {selectedIds.length > 0 && (
+                <Button
+                  variant="destructive"
+                  className="flex items-center gap-2"
+                  onClick={() => setDialog("multi-delete")}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Selected ({selectedIds.length})
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <VolunteerHeader onFilterChange={handleFilteredResults} />
+              <Button
+                variant="default"
+                className="flex items-center gap-2"
+                onClick={() => setDialog("add")}
+              >
+                <Plus className="w-4 h-4" />
+                Add Volunteer
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -72,6 +115,16 @@ export default function VolunteerManager() {
             <table className="w-full">
               <thead className="sticky top-0 bg-white">
                 <tr className="bg-gray-50/50 border-b border-gray-200">
+                  <th className="py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedIds.length > 0 &&
+                        selectedIds.length === filteredVolunteers.length
+                      }
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
                   <th className="text-left py-4 px-6 font-semibold text-gray-900">
                     Name
                   </th>
@@ -89,16 +142,28 @@ export default function VolunteerManager() {
                   </th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-200">
                 {filteredVolunteers.map((volunteer) => {
                   const shiftDetails = getShiftDetails(
                     volunteer.preferredShift
                   );
+                  const isSelected = selectedIds.includes(volunteer.id);
+
                   return (
                     <tr
                       key={volunteer.id}
-                      className="hover:bg-gray-50/50 transition-colors"
+                      className={`transition-colors ${
+                        isSelected ? "bg-blue-50" : "hover:bg-gray-50/50"
+                      }`}
                     >
+                      <td className="py-4 px-6 flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(volunteer.id)}
+                        />
+                      </td>
                       <td className="py-4 px-6 font-medium text-gray-900">
                         {volunteer.name}
                       </td>
@@ -186,13 +251,28 @@ export default function VolunteerManager() {
           )}
         </div>
       </div>
-      {dialog && (
+
+      {/* Dialogs */}
+      {dialog && dialog !== "multi-delete" && (
         <VolunteerDialog
           dialogType={dialog}
           onSubmit={handleAddOrEdit}
           volunteer={dialog !== "add" ? editingVolunteer : undefined}
           onClose={() => setDialog(null)}
-          onDelete={handleDelete}
+          onDelete={()=>handleDelete(editingVolunteer?.id as number)}
+        />
+      )}
+
+      {dialog === "multi-delete" && (
+        <VolunteerDialog
+          dialogType="delete"
+          onSubmit={() => {}}
+          onClose={() => setDialog(null)}
+          onDelete={() => {
+            handleMultiDelete();
+            setDialog(null);
+          }}
+          volunteer={undefined}
         />
       )}
     </>

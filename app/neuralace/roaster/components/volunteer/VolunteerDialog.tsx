@@ -7,10 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Edit } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
 export const shifts: Shift[] = [
@@ -27,7 +24,7 @@ interface VolunteerDialogProps {
     volunteer: Omit<Volunteer, "id">,
     editingId?: number | null
   ) => void;
-  onDelete?: (volunteerId: number) => void;
+  onDelete?: () => void;
   volunteer?: Volunteer | null;
   onClose?: () => void;
 }
@@ -51,9 +48,7 @@ export const VolunteerDialog: React.FC<VolunteerDialogProps> = ({
   };
 
   const handleDelete = () => {
-    if (volunteer?.id && onDelete) {
-      onDelete(volunteer.id);
-    }
+    onDelete && onDelete()
     onClose && onClose();
   };
 
