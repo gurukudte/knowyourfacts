@@ -120,7 +120,7 @@ export function SessionReport({ volunteer, onBack }: SessionReportProps) {
                             <div>
                                 <p className="text-sm text-gray-600 font-medium">Date</p>
                                 <p className="text-base font-semibold text-gray-900">
-                                    {new Date().toISOString().split("T")[0]}
+                                    {volunteer.sessionDetails[totalSessions - 1]?.date || (volunteer.lastActive ? new Date(volunteer.lastActive).toISOString().split("T")[0] : '-')}
                                 </p>
                             </div>
                         </div>
@@ -224,8 +224,8 @@ export function SessionReport({ volunteer, onBack }: SessionReportProps) {
                                         <TableRow
                                             key={session.sessionNumber}
                                             className={`border-b border-gray-200 transition-colors ${index % 2 === 0
-                                                    ? "bg-white hover:bg-blue-50"
-                                                    : "bg-gray-50 hover:bg-blue-50"
+                                                ? "bg-white hover:bg-blue-50"
+                                                : "bg-gray-50 hover:bg-blue-50"
                                                 }`}
                                         >
                                             <TableCell className="text-center border-r border-gray-200 font-semibold text-gray-900 py-3">
@@ -251,16 +251,16 @@ export function SessionReport({ volunteer, onBack }: SessionReportProps) {
                                             </TableCell>
                                             <TableCell className="text-center border-r border-gray-200 py-3">
                                                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${session.micWav === "Y"
-                                                        ? "bg-green-100 text-green-700 border-2 border-green-300"
-                                                        : "bg-red-100 text-red-700 border-2 border-red-300"
+                                                    ? "bg-green-100 text-green-700 border-2 border-green-300"
+                                                    : "bg-red-100 text-red-700 border-2 border-red-300"
                                                     }`}>
                                                     {session.micWav}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-center py-3">
                                                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${session.sysWav === "Y"
-                                                        ? "bg-green-100 text-green-700 border-2 border-green-300"
-                                                        : "bg-red-100 text-red-700 border-2 border-red-300"
+                                                    ? "bg-green-100 text-green-700 border-2 border-green-300"
+                                                    : "bg-red-100 text-red-700 border-2 border-red-300"
                                                     }`}>
                                                     {session.sysWav}
                                                 </span>

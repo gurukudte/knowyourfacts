@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { useVolunteers } from "../hooks/useVolunteers";
@@ -53,15 +55,6 @@ export function AnalyticsDashboard() {
         ];
     }, [volunteers, dateFilter]);
 
-    if (selectedVolunteer) {
-        return (
-            <SessionReport
-                volunteer={selectedVolunteer}
-                onBack={() => setSelectedVolunteer(null)}
-            />
-        );
-    }
-
     const SortIcon = ({ field }: { field: string }) => {
         if (sortConfig?.field !== field)
             return <ArrowUpDown className="ml-2 h-4 w-4 text-gray-400" />;
@@ -106,6 +99,15 @@ export function AnalyticsDashboard() {
             return dateString;
         }
     };
+
+    if (selectedVolunteer) {
+        return (
+            <SessionReport
+                volunteer={selectedVolunteer}
+                onBack={() => setSelectedVolunteer(null)}
+            />
+        );
+    }
 
     return (
         <div className="space-y-6 h-full flex flex-col">
