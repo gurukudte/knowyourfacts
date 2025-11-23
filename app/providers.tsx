@@ -12,7 +12,9 @@ export interface IProvidersProps {
 export function Providers({ children }: IProvidersProps) {
   return (
     <SessionProvider>
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        {children}
+      </Provider>
       <Toaster />
     </SessionProvider>
   );

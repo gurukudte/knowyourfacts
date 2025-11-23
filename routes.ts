@@ -16,6 +16,13 @@ export const publicRoutes = [
   "/api/candidate-sessions",
   "/api/googlesheet",
   "/api/tech-sheet",
+  "/neuralace/roaster",
+  "/neuralace/conversation-task",
+  "/neuralace/conversation-task/volunteers",
+  "/neuralace/conversation-task/live-monitor",
+  "/neuralace/conversation-task/analytics",
+  "/api/upload-session",
+  "/api/analytics",
 ];
 
 /**
