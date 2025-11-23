@@ -59,3 +59,39 @@ model TechSheetData {
   technicianName String
   sheetID        String
 }
+
+model DailySummary {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  email              String?
+  phone              String?
+  date               String
+  totalSessions      Int
+  startTime          String
+  endTime            String
+  totalRecordingTime String
+  totalBreakDuration String
+  sessions           Session[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("daily_summaries")
+}
+
+model Session {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  sessionNumber  Int
+  startTime      String
+  endTime        String
+  breakDuration  Float
+  micDurationMin Float
+  sysDurationMin Float
+  maxDurationMin Float
+  micWav         String
+  sysWav         String
+  timestamp      String
+  dailySummaryId String       @db.ObjectId
+  dailySummary   DailySummary @relation(fields: [dailySummaryId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
