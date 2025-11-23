@@ -1,20 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { loadState, saveState } from "./localStorage";
 
-const PERSISTED_STATE_KEY = "candidateSessions";
-
-// Load initial state from localStorage
-const preloadedState: any = loadState(PERSISTED_STATE_KEY);
+import analyticsReducer from "./analyticsSlice";
 
 const store = configureStore({
-  reducer: {},
-  preloadedState: {
-    // session: preloadedState, // Use preloaded state if available
+  reducer: {
+    analytics: analyticsReducer,
   },
-});
-// Subscribe to store changes and save the state to localStorage
-store.subscribe(() => {
-  saveState(PERSISTED_STATE_KEY, store.getState().session);
 });
 
 export type RootState = ReturnType<typeof store.getState>;

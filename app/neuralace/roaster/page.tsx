@@ -15,7 +15,6 @@ export default function Home() {
     switch (activeTab) {
       case "dashboard":
         return <Dashboard />;
-
       case "shifts":
         return <ShiftManager />;
       case "volunteers":
